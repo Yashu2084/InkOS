@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>InkOS - Web Simulator & SDK Playground</title>
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <!-- App Header -->
+    <header class="app-header">
+      <div class="logo">
+        <div class="logo-icon">🖎</div>
+        <span>InkOS Playground</span>
+      </div>
+      <div class="header-actions">
+        <span class="badge">v1.0.0-Beta (WASM Core)</span>
+      </div>
+    </header>
+
+    <!-- Split Workspace -->
+    <main class="app-workspace">
+      <!-- Left Panel: Engine Telemetry & Log Console -->
+      <section class="inspector-panel">
+        <!-- Telemetry Gauges -->
+        <div class="panel-section">
+          <h3>Engine Metrics</h3>
+          <div class="metrics-grid">
+            <div class="metric-card">
+              <span class="metric-label">Points Captured</span>
+              <span class="metric-val" id="metric-points">0</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-label">Execution Latency</span>
+              <span class="metric-val" id="metric-speed">0.0ms</span>
+            </div>
+            <div class="metric-card" style="grid-column: span 2;">
+              <span class="metric-label">Detected Gesture</span>
+              <span class="metric-val gesture-name" id="metric-gesture">None</span>
+            </div>
+            <div class="metric-card" style="grid-column: span 2;">
+              <span class="metric-label">Target Context</span>
+              <span class="metric-val" id="metric-context" style="font-size: 0.95rem; color: #60A5FA;">Empty screen</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Raw Telemetry Inspector -->
+        <div class="panel-section">
+          <h3>SDK JSON Stream</h3>
+          <pre class="inspector-data-box" id="raw-inspector">// Ready. Draw on mock screen to start telemetry...</pre>
+        </div>
+
+        <!-- Scrolling Engine Logs -->
+        <div class="log-console">
+          <h3>Log Feed</h3>
+          <ul class="log-list" id="log-list">
+            <!-- Logs populated dynamically -->
+          </ul>
+        </div>
+      </section>
+
+      <!-- Right Panel: Device Bezel Emulator -->
+      <section class="simulator-viewport">
+        <div class="device-frame" id="device-container">
+          <!-- Device Header Bar -->
+          <div class="device-header-bar">
+            <div class="device-dots">
+              <div class="device-dot"></div>
+              <div class="device-dot"></div>
+              <div class="device-dot"></div>
+            </div>
+            <span>InkOS Simulated Tablet View</span>
+            <div style="width: 36px;"></div>
+          </div>
+
+          <!-- Drawing Canvas layer -->
+          <canvas class="drawing-canvas" id="ink-canvas"></canvas>
+
+          <!-- Scrollable Mock Screen Content -->
+          <div class="device-screen" id="device-screen">
+            <div class="mock-content-grid">
+              
+              <!-- Demo Banner -->
+              <div class="demo-banner">
+                💡 <strong>How to interact:</strong> Draw directly over the elements on the screen.
+                <br/>• Underline a text sentence to translate or summarize it.
+                <br/>• Draw a Circle around an equation, product image, code block, or table.
+                <br/>• Draw a Question Mark over text or code to ask the AI engine to explain it.
+              </div>
+
+              <!-- OCR & Translation -->
+              <div class="article-block">
+                <div class="section-title">OCR & Language Translation</div>
+                
+                <p id="txt-en-1" class="inkos-target article-p" data-inkos-type="text" data-inkos-content="InkOS is not an operating system that replaces Windows, macOS, Android, or iOS. It is an operating layer that sits above existing operating systems and interprets user intent through digital ink.">
+                  InkOS is not an operating system that replaces Windows, macOS, Android, or iOS. It is an operating layer that sits above existing operating systems and interprets user intent through <span class="highlight-term">digital ink</span>.
+                </p>
+
+                <p id="txt-fr-1" class="inkos-target article-p" data-inkos-type="text" data-inkos-content="La vie est belle, pleine de défis mais aussi de moments extraordinaires." data-inkos-metadata='{"language": "fr"}'>
+                  🇫🇷 La vie est belle, pleine de défis mais aussi de moments extraordinaires.
+                </p>
+
+                <p id="txt-es-1" class="inkos-target article-p" data-inkos-type="text" data-inkos-content="El camino del éxito requiere esfuerzo constante, paciencia y una visión clara." data-inkos-metadata='{"language": "es"}'>
+                  🇪🇸 El camino del éxito requiere esfuerzo constante, paciencia y una visión clara.
+                </p>
+              </div>
+
+              <!-- Mathematics Solver -->
+              <div class="article-block">
+                <div class="section-title">Instant Mathematics</div>
+                <div class="math-container">
+                  <div id="math-1" class="inkos-target math-card" data-inkos-type="math" data-inkos-content="125 * 8">
+                    125 * 8
+                  </div>
+                  <div id="math-2" class="inkos-target math-card" data-inkos-type="math" data-inkos-content="15 + 45 / 3">
+                    15 + (45 / 3)
+                  </div>
+                </div>
+              </div>
+
+              <!-- Image Context / E-Commerce -->
+              <div class="article-block">
+                <div class="section-title">Visual Search & Image OCR</div>
+                <div class="products-row">
+                  <!-- Watch Card -->
+                  <div class="product-card">
+                    <div id="img-watch" class="inkos-target product-image-container" data-inkos-type="image" data-inkos-content="Heritage Chronograph Wristwatch" data-inkos-metadata='{"price": "$249.00", "ocrText": "HERITAGE AUTOMATIC"}'>
+                      <img src="/heritage_watch.jpg" alt="Heritage Wristwatch" />
+                    </div>
+                    <div class="product-title">Heritage Chronograph</div>
+                    <div class="product-price">$249.00</div>
+                  </div>
+
+                  <!-- Sunglasses Card -->
+                  <div class="product-card">
+                    <div id="img-glasses" class="inkos-target product-image-container" data-inkos-type="image" data-inkos-content="Aero Aviator Sunglasses" data-inkos-metadata='{"price": "$129.00", "ocrText": "UV400 POLARIZED"}'>
+                      <img src="/cool_sunglasses.jpg" alt="Aviator Sunglasses" />
+                    </div>
+                    <div class="product-title">Aero Aviators</div>
+                    <div class="product-price">$129.00</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Code Explainer -->
+              <div class="article-block">
+                <div class="section-title">Developer Sandbox (Code Target)</div>
+                <pre id="code-sandbox-1" class="inkos-target code-block" data-inkos-type="code" data-inkos-content="console.log('Running in InkOS sandbox!');
+const price = 249;
+const discount = 0.15;
+const finalPrice = price * (1 - discount);
+console.log('Final Calculated Price:', '$' + finalPrice.toFixed(2));"><code>console.log('Running in InkOS sandbox!');
+const price = 249;
+const discount = 0.15;
+const finalPrice = price * (1 - discount);
+console.log('Final Calculated Price:', '$' + finalPrice.toFixed(2));</code></pre>
+              </div>
+
+              <!-- Table Context -->
+              <div class="article-block">
+                <div class="section-title">Structured Tables</div>
+                <div id="table-plugins" class="inkos-target table-wrapper" data-inkos-type="table" data-inkos-content="Plugin Marketplace Stats">
+                  <table class="mock-table">
+                    <thead>
+                      <tr>
+                        <th>Plugin ID</th>
+                        <th>Name</th>
+                        <th>Category</th>
+                        <th>Rating</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>finance_plugin</td>
+                        <td>Finance & Markets</td>
+                        <td>Productivity</td>
+                        <td>4.8</td>
+                      </tr>
+                      <tr>
+                        <td>dev_plugin</td>
+                        <td>Developer Toolbox</td>
+                        <td>Utilities</td>
+                        <td>4.9</td>
+                      </tr>
+                      <tr>
+                        <td>travel_plugin</td>
+                        <td>Travel Buddy</td>
+                        <td>Lifestyle</td>
+                        <td>4.5</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Main Module Script -->
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
