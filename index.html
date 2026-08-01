@@ -3,150 +3,177 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>InkOS - Web Simulator & SDK Playground</title>
+    <title>InkOS — Every Screen. One Language.</title>
     <link rel="stylesheet" href="/src/style.css" />
   </head>
   <body>
-    <!-- App Header -->
-    <header class="app-header">
-      <div class="logo">
-        <div class="logo-icon">🖎</div>
-        <span>InkOS Playground</span>
+    <!-- Custom glowing ink cursor pointer -->
+    <div id="ink-pointer"></div>
+
+    <!-- Master Header Navigation -->
+    <header class="master-header">
+      <div class="brand">
+        <div class="brand-icon">🖎</div>
+        <span>InkOS</span>
       </div>
-      <div class="header-actions">
-        <span class="badge">v1.0.0-Beta (WASM Core)</span>
+      
+      <nav class="nav-links">
+        <button class="nav-tab-btn active" data-tab-id="tab-home">Home</button>
+        <button class="nav-tab-btn" data-tab-id="tab-dashboard">Dashboard</button>
+        <button class="nav-tab-btn" data-tab-id="tab-about">About</button>
+        <button class="nav-tab-btn" data-tab-id="tab-downloads">Downloads</button>
+      </nav>
+
+      <div class="header-status">
+        <div class="status-dot"></div>
+        <span>Overlay Active (Ctrl+Space)</span>
       </div>
     </header>
 
-    <!-- Split Workspace -->
-    <main class="app-workspace">
-      <!-- Left Panel: Engine Telemetry & Log Console -->
-      <section class="inspector-panel">
-        <!-- Telemetry Gauges -->
-        <div class="panel-section">
-          <h3>Engine Metrics</h3>
-          <div class="metrics-grid">
-            <div class="metric-card">
-              <span class="metric-label">Points Captured</span>
-              <span class="metric-val" id="metric-points">0</span>
-            </div>
-            <div class="metric-card">
-              <span class="metric-label">Execution Latency</span>
-              <span class="metric-val" id="metric-speed">0.0ms</span>
-            </div>
-            <div class="metric-card" style="grid-column: span 2;">
-              <span class="metric-label">Detected Gesture</span>
-              <span class="metric-val gesture-name" id="metric-gesture">None</span>
-            </div>
-            <div class="metric-card" style="grid-column: span 2;">
-              <span class="metric-label">Target Context</span>
-              <span class="metric-val" id="metric-context" style="font-size: 0.95rem; color: #60A5FA;">Empty screen</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Raw Telemetry Inspector -->
-        <div class="panel-section">
-          <h3>SDK JSON Stream</h3>
-          <pre class="inspector-data-box" id="raw-inspector">// Ready. Draw on mock screen to start telemetry...</pre>
-        </div>
-
-        <!-- Scrolling Engine Logs -->
-        <div class="log-console">
-          <h3>Log Feed</h3>
-          <ul class="log-list" id="log-list">
-            <!-- Logs populated dynamically -->
-          </ul>
+    <!-- TAB 1: HOME & HERO LANDING -->
+    <div id="tab-home" class="tab-content active">
+      <!-- Hero Header -->
+      <section class="landing-hero">
+        <h1>Every Screen.<br>One Language.</h1>
+        <p>Draw naturally on top of any digital screen. InkOS understands context instantly, executing calculations, OCR extracts, translations, and AI prompts in milliseconds.</p>
+        
+        <div class="hero-buttons">
+          <button class="btn-primary" id="hero-get-started">Test Simulator</button>
+          <button class="btn-secondary" id="hero-watch-demo">Play Demo Tones</button>
         </div>
       </section>
 
-      <!-- Right Panel: Device Bezel Emulator -->
-      <section class="simulator-viewport">
-        <div class="device-frame" id="device-container">
-          <!-- Device Header Bar -->
-          <div class="device-header-bar">
-            <div class="device-dots">
-              <div class="device-dot"></div>
-              <div class="device-dot"></div>
-              <div class="device-dot"></div>
-            </div>
-            <span>InkOS Simulated Tablet View</span>
-            <div style="width: 36px;"></div>
+      <!-- Live Simulator Workspace -->
+      <section class="demo-section-wrapper" id="simulator-section">
+        <!-- Sidebar Inspector (Control Panel) -->
+        <div class="simulator-inspector">
+          <div class="inspector-header">
+            <span>SDK Diagnostics</span>
+            <span id="inspect-latency">READY</span>
           </div>
 
-          <!-- Drawing Canvas layer -->
-          <canvas class="drawing-canvas" id="ink-canvas"></canvas>
+          <div class="inspector-stats-grid">
+            <div class="stat-widget">
+              <span class="stat-label">Points</span>
+              <span class="stat-value" id="metric-points">0</span>
+            </div>
+            <div class="stat-widget">
+              <span class="stat-label">Latency</span>
+              <span class="stat-value" id="metric-speed">0.0ms</span>
+            </div>
+            <div class="stat-widget" style="grid-column: span 2;">
+              <span class="stat-label">Shape Class</span>
+              <span class="stat-value cyan-glow" id="metric-gesture">None</span>
+            </div>
+            <div class="stat-widget" style="grid-column: span 2;">
+              <span class="stat-label">Coordinates Context</span>
+              <span class="stat-value" id="metric-context" style="font-size: 0.8rem; color: #60A5FA;">Empty screen</span>
+            </div>
+          </div>
 
-          <!-- Scrollable Mock Screen Content -->
-          <div class="device-screen" id="device-screen">
-            <div class="mock-content-grid">
-              
-              <!-- Demo Banner -->
-              <div class="demo-banner">
-                💡 <strong>How to interact:</strong> Draw directly over the elements on the screen.
-                <br/>• Underline a text sentence to translate or summarize it.
-                <br/>• Draw a Circle around an equation, product image, code block, or table.
-                <br/>• Draw a Question Mark over text or code to ask the AI engine to explain it.
+          <div class="logs-title">Engine Process Stream</div>
+          <ul class="simulator-logs" id="log-list">
+            <!-- Dynamic logs stream -->
+          </ul>
+
+          <div class="logs-title">JSON Pipeline Telemetry</div>
+          <pre class="inspector-data-box" id="raw-inspector" style="font-size: 0.7rem; color: #00F1FC; font-family: var(--font-mono); max-height: 140px; overflow-y: auto;">// Ready. Draw on mock tablet to stream...</pre>
+        </div>
+
+        <!-- Simulated Device Frame Bezel -->
+        <div class="simulator-device-container">
+          <div class="tablet-bezel" id="device-container">
+            <!-- Bezel Top bar -->
+            <div class="tablet-top-bar">
+              <div class="tablet-bezel-dots">
+                <div class="bezel-dot"></div>
+                <div class="bezel-dot"></div>
+                <div class="bezel-dot"></div>
               </div>
+              <span>InkOS Tablet Overlay Emulator</span>
+              <div style="width: 40px;"></div>
+            </div>
 
-              <!-- OCR & Translation -->
-              <div class="article-block">
-                <div class="section-title">OCR & Language Translation</div>
+            <!-- Dimmed Layer Background on overlay activation -->
+            <div class="inkos-overlay-active" id="dimmed-overlay"></div>
+
+            <!-- Drawing Canvas Layer -->
+            <canvas class="tablet-canvas" id="ink-canvas"></canvas>
+
+            <!-- Scrollable Tablet Screen Content -->
+            <div class="tablet-screen" id="device-screen">
+              <div class="mock-elements-wrapper">
                 
-                <p id="txt-en-1" class="inkos-target article-p" data-inkos-type="text" data-inkos-content="InkOS is not an operating system that replaces Windows, macOS, Android, or iOS. It is an operating layer that sits above existing operating systems and interprets user intent through digital ink.">
-                  InkOS is not an operating system that replaces Windows, macOS, Android, or iOS. It is an operating layer that sits above existing operating systems and interprets user intent through <span class="highlight-term">digital ink</span>.
-                </p>
+                <!-- Quick Instructions -->
+                <div class="sim-banner">
+                  💡 <strong>Simulate Intent:</strong> Draw directly over any element below.
+                  <br/>• <strong>Underline</strong> foreign phrases to translate.
+                  <br/>• <strong>Circle</strong> equations to solve, or image products to visually shop.
+                  <br/>• <strong>Draw a Question Mark (?)</strong> over code block definitions to trigger the AI Explainer.
+                </div>
 
-                <p id="txt-fr-1" class="inkos-target article-p" data-inkos-type="text" data-inkos-content="La vie est belle, pleine de défis mais aussi de moments extraordinaires." data-inkos-metadata='{"language": "fr"}'>
-                  🇫🇷 La vie est belle, pleine de défis mais aussi de moments extraordinaires.
-                </p>
+                <!-- Text OCR & Translation -->
+                <div class="article-block">
+                  <div class="sim-section-header">Text & Languages</div>
+                  
+                  <p id="txt-en" class="inkos-target article-p" data-inkos-type="text" data-inkos-content="InkOS introducing Intent Through Ink. Users interact naturally with whatever is already on their screen, preventing app switches.">
+                    InkOS introducing <span class="sim-highlight">Intent Through Ink</span>. Users interact naturally with whatever is already on their screen, preventing app switches.
+                  </p>
 
-                <p id="txt-es-1" class="inkos-target article-p" data-inkos-type="text" data-inkos-content="El camino del éxito requiere esfuerzo constante, paciencia y una visión clara." data-inkos-metadata='{"language": "es"}'>
-                  🇪🇸 El camino del éxito requiere esfuerzo constante, paciencia y una visión clara.
-                </p>
-              </div>
+                  <p id="txt-fr" class="inkos-target article-p" data-inkos-type="text" data-inkos-content="La vie est belle, pleine de défis mais aussi de moments extraordinaires." data-inkos-metadata='{"language": "fr"}'>
+                    🇫🇷 La vie est belle, pleine de défis mais aussi de moments extraordinaires.
+                  </p>
 
-              <!-- Mathematics Solver -->
-              <div class="article-block">
-                <div class="section-title">Instant Mathematics</div>
-                <div class="math-container">
-                  <div id="math-1" class="inkos-target math-card" data-inkos-type="math" data-inkos-content="125 * 8">
-                    125 * 8
-                  </div>
-                  <div id="math-2" class="inkos-target math-card" data-inkos-type="math" data-inkos-content="15 + 45 / 3">
-                    15 + (45 / 3)
+                  <p id="txt-es" class="inkos-target article-p" data-inkos-type="text" data-inkos-content="El camino del éxito requiere esfuerzo constante, paciencia y una visión clara." data-inkos-metadata='{"language": "es"}'>
+                    🇪🇸 El camino del éxito requiere esfuerzo constante, paciencia y una visión clara.
+                  </p>
+                </div>
+
+                <!-- Equations Math -->
+                <div class="article-block">
+                  <div class="sim-section-header">Calculations</div>
+                  <div class="math-grid">
+                    <div id="eq-1" class="inkos-target math-card" data-inkos-type="math" data-inkos-content="125 * 8">
+                      125 * 8
+                    </div>
+                    <div id="eq-2" class="inkos-target math-card" data-inkos-type="math" data-inkos-content="15 + 45 / 3">
+                      15 + (45 / 3)
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <!-- Image Context / E-Commerce -->
-              <div class="article-block">
-                <div class="section-title">Visual Search & Image OCR</div>
-                <div class="products-row">
-                  <!-- Watch Card -->
-                  <div class="product-card">
-                    <div id="img-watch" class="inkos-target product-image-container" data-inkos-type="image" data-inkos-content="Heritage Chronograph Wristwatch" data-inkos-metadata='{"price": "$249.00", "ocrText": "HERITAGE AUTOMATIC"}'>
-                      <img src="/heritage_watch.jpg" alt="Heritage Wristwatch" />
+                <!-- Product visual catalog search -->
+                <div class="article-block">
+                  <div class="sim-section-header">Visual Commerce</div>
+                  <div class="product-display-grid">
+                    
+                    <div class="sim-product-card">
+                      <div id="img-watch" class="inkos-target product-image-frame" data-inkos-type="image" data-inkos-content="Heritage Chronograph Wristwatch" data-inkos-metadata='{"price": "$249.00", "ocrText": "HERITAGE AUTOMATIC"}'>
+                        <img src="/heritage_watch.jpg" alt="Luxury Watch" />
+                      </div>
+                      <div class="product-meta">
+                        <span class="prod-name">Heritage Chrono</span>
+                        <span class="prod-price">$249.00</span>
+                      </div>
                     </div>
-                    <div class="product-title">Heritage Chronograph</div>
-                    <div class="product-price">$249.00</div>
-                  </div>
 
-                  <!-- Sunglasses Card -->
-                  <div class="product-card">
-                    <div id="img-glasses" class="inkos-target product-image-container" data-inkos-type="image" data-inkos-content="Aero Aviator Sunglasses" data-inkos-metadata='{"price": "$129.00", "ocrText": "UV400 POLARIZED"}'>
-                      <img src="/cool_sunglasses.jpg" alt="Aviator Sunglasses" />
+                    <div class="sim-product-card">
+                      <div id="img-sunglasses" class="inkos-target product-image-frame" data-inkos-type="image" data-inkos-content="Aero Aviator Sunglasses" data-inkos-metadata='{"price": "$129.00", "ocrText": "UV400 POLARIZED"}'>
+                        <img src="/cool_sunglasses.jpg" alt="Aviator Sunglasses" />
+                      </div>
+                      <div class="product-meta">
+                        <span class="prod-name">Aero Aviators</span>
+                        <span class="prod-price">$129.00</span>
+                      </div>
                     </div>
-                    <div class="product-title">Aero Aviators</div>
-                    <div class="product-price">$129.00</div>
+
                   </div>
                 </div>
-              </div>
 
-              <!-- Code Explainer -->
-              <div class="article-block">
-                <div class="section-title">Developer Sandbox (Code Target)</div>
-                <pre id="code-sandbox-1" class="inkos-target code-block" data-inkos-type="code" data-inkos-content="console.log('Running in InkOS sandbox!');
+                <!-- Code block sandbox -->
+                <div class="article-block">
+                  <div class="sim-section-header">Developer Sandbox</div>
+                  <pre id="code-block" class="inkos-target code-card" data-inkos-type="code" data-inkos-content="console.log('Running in InkOS sandbox!');
 const price = 249;
 const discount = 0.15;
 const finalPrice = price * (1 - discount);
@@ -155,52 +182,339 @@ const price = 249;
 const discount = 0.15;
 const finalPrice = price * (1 - discount);
 console.log('Final Calculated Price:', '$' + finalPrice.toFixed(2));</code></pre>
-              </div>
-
-              <!-- Table Context -->
-              <div class="article-block">
-                <div class="section-title">Structured Tables</div>
-                <div id="table-plugins" class="inkos-target table-wrapper" data-inkos-type="table" data-inkos-content="Plugin Marketplace Stats">
-                  <table class="mock-table">
-                    <thead>
-                      <tr>
-                        <th>Plugin ID</th>
-                        <th>Name</th>
-                        <th>Category</th>
-                        <th>Rating</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td>finance_plugin</td>
-                        <td>Finance & Markets</td>
-                        <td>Productivity</td>
-                        <td>4.8</td>
-                      </tr>
-                      <tr>
-                        <td>dev_plugin</td>
-                        <td>Developer Toolbox</td>
-                        <td>Utilities</td>
-                        <td>4.9</td>
-                      </tr>
-                      <tr>
-                        <td>travel_plugin</td>
-                        <td>Travel Buddy</td>
-                        <td>Lifestyle</td>
-                        <td>4.5</td>
-                      </tr>
-                    </tbody>
-                  </table>
                 </div>
-              </div>
 
+                <!-- Table CSV export -->
+                <div class="article-block">
+                  <div class="sim-section-header">Structured Data</div>
+                  <div id="table-card" class="inkos-target table-card" data-inkos-type="table" data-inkos-content="Plugin Statistics Table">
+                    <table class="sim-table">
+                      <thead>
+                        <tr>
+                          <th>Plugin ID</th>
+                          <th>Name</th>
+                          <th>Category</th>
+                          <th>Rating</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>finance_plugin</td>
+                          <td>Finance & Markets</td>
+                          <td>Productivity</td>
+                          <td>4.8</td>
+                        </tr>
+                        <tr>
+                          <td>dev_plugin</td>
+                          <td>Developer Toolbox</td>
+                          <td>Utilities</td>
+                          <td>4.9</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+              </div>
             </div>
           </div>
         </div>
       </section>
-    </main>
 
-    <!-- Main Module Script -->
+      <!-- Web Landing Features Section -->
+      <section class="features-section">
+        <div class="section-label-center">
+          <h2>Redefining Screen Interactions</h2>
+          <p>InkOS engines pack high-performance local AI capabilities on every desktop client.</p>
+        </div>
+
+        <div class="feature-cards-grid">
+          <div class="feature-glass-card">
+            <div class="feature-icon-box">🔢</div>
+            <h3>Math Solver Overlay</h3>
+            <p>Draw a circle around mathematical formulas or handwritten expressions to evaluate results instantly on screen.</p>
+          </div>
+
+          <div class="feature-glass-card">
+            <div class="feature-icon-box">🌐</div>
+            <h3>In-Context Translation</h3>
+            <p>Underline phrases written in foreign scripts to auto-detect and translate word blocks directly in place.</p>
+          </div>
+
+          <div class="feature-glass-card">
+            <div class="feature-icon-box">🧠</div>
+            <h3>Concept Explanation</h3>
+            <p>Draw a question mark symbol next to complex paragraphs, diagrams, or lines of code to summon a glass definitions overlay.</p>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- TAB 2: CONFIGURATION DASHBOARD / SETTINGS -->
+    <div id="tab-dashboard" class="tab-content">
+      <section class="settings-dashboard-container">
+        <h1>InkOS Settings Panel</h1>
+        <p style="color: var(--text-secondary); margin-top: 6px;">Customize operational shortcuts, active plugins, and local AI engines.</p>
+
+        <div class="dashboard-layout">
+          <!-- Sidebar tabs -->
+          <nav class="dashboard-sidebar-nav">
+            <button class="dash-nav-btn active" data-sub-tab="general">General</button>
+            <button class="dash-nav-btn" data-sub-tab="gestures">Gestures</button>
+            <button class="dash-nav-btn" data-sub-tab="plugins">Plugins</button>
+            <button class="dash-nav-btn" data-sub-tab="models">AI Models</button>
+          </nav>
+
+          <!-- Main Settings Form Viewports -->
+          <div class="settings-viewport">
+            
+            <!-- SUB-TAB: GENERAL -->
+            <div id="sub-tab-general" class="settings-group">
+              <h2>General Preferences</h2>
+              
+              <div class="settings-row-inline">
+                <div class="settings-label-wrapper">
+                  <label for="shortcut-select">Global Trigger Shortcut</label>
+                  <span class="settings-desc">Key combination to trigger the transparent overlay layer.</span>
+                </div>
+                <select id="shortcut-select" class="select-input">
+                  <option value="ctrl+space">Ctrl + Space (Recommended)</option>
+                  <option value="alt+space">Alt + Space</option>
+                  <option value="ctrl+shift+i">Ctrl + Shift + I</option>
+                </select>
+              </div>
+
+              <div class="settings-row-inline">
+                <div class="settings-label-wrapper">
+                  <label for="sound-switch">Acoustic Feedback</label>
+                  <span class="settings-desc">Enable Web Audio synthesized pops, sweeps, and clicks during interaction.</span>
+                </div>
+                <label class="switch-toggle">
+                  <input type="checkbox" id="sound-switch" checked />
+                  <span class="slider-switch"></span>
+                </label>
+              </div>
+
+              <div class="settings-row-inline">
+                <div class="settings-label-wrapper">
+                  <label for="mode-select">Default Execution Mode</label>
+                  <span class="settings-desc">Select how predictions are carried out upon drawing completion.</span>
+                </div>
+                <select id="mode-select" class="select-input">
+                  <option value="ask">Ask with floating pill menu (Recommended)</option>
+                  <option value="auto">Execute top predicted action immediately</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- SUB-TAB: GESTURES -->
+            <div id="sub-tab-gestures" class="settings-group" style="display: none;">
+              <h2>Gesture Engine Tuner</h2>
+              
+              <div class="settings-row-inline">
+                <div class="settings-label-wrapper">
+                  <label>Circle Circularity Threshold</label>
+                  <span class="settings-desc">Sensibility coefficient to differentiate circles from rectangle loops.</span>
+                </div>
+                <input type="text" class="text-input" value="0.20 (Optimal)" disabled style="text-align: right; max-width: 140px;" />
+              </div>
+
+              <div class="settings-row-inline">
+                <div class="settings-label-wrapper">
+                  <label>Underline Aspect Ratio</label>
+                  <span class="settings-desc">Minimum width-to-height ratio requirement to validate underlines.</span>
+                </div>
+                <input type="text" class="text-input" value="2.50" disabled style="text-align: right; max-width: 140px;" />
+              </div>
+            </div>
+
+            <!-- SUB-TAB: PLUGINS -->
+            <div id="sub-tab-plugins" class="settings-group" style="display: none;">
+              <h2>Registered Extension Plugins</h2>
+              <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 10px;">Select which developer plugin hooks load on overlay activation:</p>
+              
+              <div class="checkbox-card-grid">
+                <label class="checkbox-row-card">
+                  <input type="checkbox" id="plugin-finance" checked />
+                  <div class="pill-label-wrapper">
+                    <strong>Finance & Markets (WASM)</strong>
+                    <span class="btn-desc">Currency converter converter ($150, 20 EUR) and market quotes ($AAPL, $TSLA).</span>
+                  </div>
+                </label>
+
+                <label class="checkbox-row-card">
+                  <input type="checkbox" id="plugin-dev" checked />
+                  <div class="pill-label-wrapper">
+                    <strong>Developer Sandbox Toolbox (JS)</strong>
+                    <span class="btn-desc">Secure client-side sandbox runtime evaluator for circled code blocks.</span>
+                  </div>
+                </label>
+
+                <label class="checkbox-row-card">
+                  <input type="checkbox" id="plugin-travel" />
+                  <div class="pill-label-wrapper">
+                    <strong>Travel Buddy & Maps (Unavailable)</strong>
+                    <span class="btn-desc">Detect hotel locations, airport flight statuses, and route overlays.</span>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <!-- SUB-TAB: MODELS -->
+            <div id="sub-tab-models" class="settings-group" style="display: none;">
+              <h2>Local & Cloud AI Providers</h2>
+              
+              <div class="settings-row-inline">
+                <div class="settings-label-wrapper">
+                  <label for="ai-select">Primary Reasoning Model</label>
+                  <span class="settings-desc">Used for summarize, code explainer, and complex context reasoning.</span>
+                </div>
+                <select id="ai-select" class="select-input">
+                  <option value="gemini-flash">Gemini 1.5 Flash (Recommended)</option>
+                  <option value="gemini-pro">Gemini 1.5 Pro</option>
+                  <option value="gpt-4o">OpenAI GPT-4o</option>
+                  <option value="ollama-local">Ollama Local (llama3)</option>
+                </select>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- TAB 3: ABOUT ROADMAP -->
+    <div id="tab-about" class="tab-content">
+      <section class="about-section-container">
+        <header class="about-header">
+          <h1>Operating Layer for Human Intent</h1>
+        </header>
+
+        <blockquote class="about-quote">
+          "The most natural interface is the one you don't notice. InkOS turns the simple act of drawing into a direct conversation with computational context."
+        </blockquote>
+
+        <p class="about-body-p">
+          InkOS was founded on a simple realization: modern computer interaction is heavily fragmented. When you see an equation, an unknown French phrase, or a product in a photograph on your screen, you are forced to copy-paste, open search browsers, type prompts, and flip windows.
+        </p>
+        <p class="about-body-p">
+          By overlaying a universal, high-performance canvas directly above all running software, InkOS interprets coordinate intersections and matches drawing gestures in less than 10 milliseconds. Powered by a Rust core runtime, local on-device models, and WebAssembly plugin nodes, InkOS is built for speed and complete operational privacy.
+        </p>
+
+        <h2 style="margin-top: 60px; font-size: 1.5rem; text-align: center;">Product Vision Roadmap</h2>
+        
+        <div class="roadmap-timeline">
+          <div class="timeline-item">
+            <div class="timeline-date">Q3 2026</div>
+            <div class="timeline-content">
+              <h4>InkOS Web SDK Playground</h4>
+              <p>Delivery of the core TypeScript SDK engines modeling Gesture, Context, Intent, Action, and Plugin layers within web client sandboxes.</p>
+            </div>
+          </div>
+
+          <div class="timeline-item">
+            <div class="timeline-date">Q4 2026</div>
+            <div class="timeline-content">
+              <h4>WebAssembly Core Port</h4>
+              <p>Migrating gesture classifiers and the context intersection evaluator to compiled Rust WebAssembly to hit sub-millisecond execution speeds.</p>
+            </div>
+          </div>
+
+          <div class="timeline-item">
+            <div class="timeline-date">Q1 2027</div>
+            <div class="timeline-content">
+              <h4>Native OS Overlays (Beta)</h4>
+              <p>Standalone desktop clients utilizing C# (Windows global hooks) and Swift (macOS canvas utilities) for system integration overlay hooks.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- TAB 4: DOWNLOADS -->
+    <div id="tab-downloads" class="tab-content">
+      <section class="downloads-section-container" style="text-align: center;">
+        <h1>Get InkOS</h1>
+        <p style="color: var(--text-secondary); margin-top: 8px;">Download native clients or install the standalone Developer SDK package.</p>
+
+        <div class="downloads-grid">
+          
+          <div class="download-card">
+            <span class="platform-name">🖥️ Windows Client</span>
+            <span class="platform-ver">v1.0.0-Beta | Windows 10/11</span>
+            <button class="download-btn" onclick="alert('Downloading Windows installer (simulated)')">Download .msi Installer</button>
+          </div>
+
+          <div class="download-card">
+            <span class="platform-name">🍎 macOS Client</span>
+            <span class="platform-ver">v1.0.0-Beta | Apple Silicon M1/M2/M3</span>
+            <button class="download-btn" onclick="alert('Downloading macOS DMG package (simulated)')">Download .dmg Installer</button>
+          </div>
+
+          <div class="download-card">
+            <span class="platform-name">📦 Developer SDK</span>
+            <span class="platform-ver">npm package | TypeScript / Node.js</span>
+            <button class="download-btn" onclick="alert('Developer setup guides copied to clipboard (simulated)')">npm i @inkos/core-sdk</button>
+          </div>
+
+        </div>
+      </section>
+    </div>
+
+    <!-- Master Footer -->
+    <footer class="master-footer">
+      <div class="footer-logo">InkOS</div>
+      <div class="footer-copy">© 2026 InkOS Technologies Inc. All rights reserved. Every Screen. One Language.</div>
+    </footer>
+
+    <!-- Bottom Right Floating Orb and Control Center -->
+    <div class="control-orb-wrapper">
+      <!-- Expanded control panel -->
+      <div class="control-center-panel" id="control-panel">
+        <div class="control-panel-header">
+          <span>InkOS Control Center</span>
+          <span style="font-size: 0.75rem; color: var(--color-cyan);">WASM Active</span>
+        </div>
+        <div class="control-items-list">
+          <div class="control-item-row" data-action-id="trigger_overlay">
+            <div class="control-item-left">
+              <span class="control-item-icon">🖎</span>
+              <span>Trigger Ink Overlay</span>
+            </div>
+            <span style="font-size: 0.7rem; color: var(--text-secondary);">Ctrl+Space</span>
+          </div>
+
+          <div class="control-item-row" data-action-id="open_settings">
+            <div class="control-item-left">
+              <span class="control-item-icon">⚙️</span>
+              <span>Open Settings Dashboard</span>
+            </div>
+          </div>
+
+          <div class="control-item-row" data-action-id="play_demo_sound">
+            <div class="control-item-left">
+              <span class="control-item-icon">🎵</span>
+              <span>Play Synthesized Audio</span>
+            </div>
+          </div>
+
+          <div class="control-item-row" data-action-id="clear_canvas">
+            <div class="control-item-left">
+              <span class="control-item-icon">🧹</span>
+              <span>Clear Overlay Canvas</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Floating Orb button -->
+      <div class="glass-orb" id="control-orb" title="InkOS Control Center">
+        <div class="orb-ring">
+          <div class="orb-center"></div>
+        </div>
+      </div>
+    </div>
+
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

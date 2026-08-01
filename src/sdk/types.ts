@@ -73,3 +73,11 @@ export interface InkOSPlugin {
     handler: (context: ContextElement, gesture: Gesture) => Promise<ActionResult>;
   }[];
 }
+
+export interface InkOSConfig {
+  shortcut: string;
+  soundEnabled: boolean;
+  activeAIModel: string;
+  activePlugins: string[];
+}
+

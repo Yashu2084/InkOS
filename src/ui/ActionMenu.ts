@@ -1,4 +1,5 @@
 import type { Intent } from '../sdk/types';
+import { AudioSynth } from '../sdk/AudioSynth';
 
 export class ActionMenu {
   private container: HTMLElement;
@@ -21,14 +22,14 @@ export class ActionMenu {
     this.hideResult();
 
     const menu = document.createElement('div');
-    menu.className = 'floating-action-menu';
+    menu.className = 'vision-action-pill';
     
     // Header indicating the gesture type matched
     const matchedGesture = intents[0]?.gesture || 'unknown';
     const header = document.createElement('div');
-    header.className = 'menu-header';
+    header.className = 'pill-meta-header';
     header.innerHTML = `
-      <span>Gesture matched: <strong>${matchedGesture}</strong></span>
+      <span>Matched: <strong>${matchedGesture}</strong></span>
       <span>${intents.length} actions</span>
     `;
     menu.appendChild(header);
@@ -36,22 +37,24 @@ export class ActionMenu {
     // List out matched intents
     intents.forEach((intent, idx) => {
       const btn = document.createElement('button');
-      btn.className = 'menu-item-btn';
+      btn.className = 'pill-item-btn';
       
-      // Highlight the first (top confidence) recommendation
+      // Highlight the top recommendation in Cyan glass
       if (idx === 0) {
-        btn.classList.add('top-recommendation');
+        btn.classList.add('cyan-active');
       }
 
       btn.innerHTML = `
-        <span class="btn-icon">${intent.icon}</span>
-        <div class="btn-label-box">
+        <span class="pill-icon">${intent.icon}</span>
+        <div class="pill-label-wrapper">
           <strong>${intent.label}</strong>
-          <span class="btn-desc">${intent.description}</span>
+          <span class="pill-desc">${intent.description}</span>
         </div>
       `;
 
       btn.addEventListener('click', () => {
+        // Play click sound on selection
+        AudioSynth.playPop();
         onSelect(intent);
       });
 
@@ -79,7 +82,7 @@ export class ActionMenu {
     this.hide();
     
     const loader = document.createElement('div');
-    loader.className = 'floating-action-menu';
+    loader.className = 'vision-action-pill';
     loader.style.width = '120px';
     loader.innerHTML = `
       <div class="loading-box">
@@ -106,12 +109,14 @@ export class ActionMenu {
     this.hide();
 
     const result = document.createElement('div');
-    result.className = 'action-result-overlay';
+    result.className = 'glass-result-overlay';
     
     const closeBtn = document.createElement('button');
-    closeBtn.className = 'result-close';
+    closeBtn.className = 'result-close-btn';
     closeBtn.innerHTML = '&times;';
     closeBtn.addEventListener('click', () => {
+      // Play pop sound when closing result
+      AudioSynth.playClick();
       this.hideResult();
       onClose();
     });
@@ -127,23 +132,26 @@ export class ActionMenu {
 
     this.adjustElementPosition(result, position);
 
-    // Bind special action buttons inside content (e.g. OCR copies)
-    const ocrCopyBtn = result.querySelector('#ocr-copy-btn-action');
+    // Bind special actions if present inside content
+    const ocrCopyBtn = result.querySelector('#ocr-copy-btn-action') as HTMLElement;
     if (ocrCopyBtn) {
       ocrCopyBtn.addEventListener('click', () => {
+        AudioSynth.playPop();
         const text = ocrCopyBtn.previousElementSibling?.textContent || '';
         navigator.clipboard.writeText(text.replace(/"/g, ''));
         ocrCopyBtn.textContent = 'Copied to Clipboard! ✓';
-        ocrCopyBtn.classList.add('bg-success');
+        ocrCopyBtn.style.background = '#30D158';
       });
     }
 
-    const csvCopyBtn = result.querySelector('#te-copy-btn');
+    const csvCopyBtn = result.querySelector('#te-copy-btn') as HTMLElement;
     if (csvCopyBtn) {
       csvCopyBtn.addEventListener('click', () => {
+        AudioSynth.playPop();
         const text = result.querySelector('.te-csv')?.textContent || '';
         navigator.clipboard.writeText(text);
         csvCopyBtn.textContent = 'CSV Copied! ✓';
+        csvCopyBtn.style.background = '#30D158';
       });
     }
   }
@@ -156,14 +164,13 @@ export class ActionMenu {
   }
 
   /**
-   * Safely calculates positioning within container boundaries.
+   * Calculates positioning within container boundaries.
    */
   private adjustElementPosition(el: HTMLElement, pos: { x: number; y: number }): void {
     const parentRect = this.container.getBoundingClientRect();
     const elWidth = el.offsetWidth || 250;
     const elHeight = el.offsetHeight || 180;
 
-    // Default: position next to coordinate
     let left = pos.x + 10;
     let top = pos.y + 10;
 
@@ -171,7 +178,6 @@ export class ActionMenu {
     if (left + elWidth > parentRect.width) {
       left = pos.x - elWidth - 10;
     }
-    // Check left boundary overflow
     if (left < 0) {
       left = 10;
     }
@@ -180,7 +186,6 @@ export class ActionMenu {
     if (top + elHeight > parentRect.height) {
       top = pos.y - elHeight - 10;
     }
-    // Check top boundary overflow
     if (top < 0) {
       top = 10;
     }
