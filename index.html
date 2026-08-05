@@ -10,6 +10,12 @@
     <!-- Custom glowing ink cursor pointer -->
     <div id="ink-pointer"></div>
 
+    <!-- Viewport-wide Drawing Canvas Layer -->
+    <div class="inkos-overlay-active" id="dimmed-overlay">
+      <canvas class="tablet-canvas" id="ink-canvas"></canvas>
+    </div>
+
+
     <!-- Master Header Navigation -->
     <header class="master-header">
       <div class="brand">
@@ -33,219 +39,129 @@
     <!-- TAB 1: HOME & HERO LANDING -->
     <div id="tab-home" class="tab-content active">
       <!-- Hero Header -->
-      <section class="landing-hero">
+      <section class="landing-hero" style="padding-bottom: 30px;">
+        <div class="hero-badge">Intent Through Ink</div>
         <h1>Every Screen.<br>One Language.</h1>
-        <p>Draw naturally on top of any digital screen. InkOS understands context instantly, executing calculations, OCR extracts, translations, and AI prompts in milliseconds.</p>
+        <p>InkOS is a premium overlay interaction layer sitting above all applications. Simply press <strong>Ctrl + Space</strong> to activate a transparent sheet of digital glass, draw naturally over any text, image, code, or table, and watch your computer understand intent instantly.</p>
         
         <div class="hero-buttons">
-          <button class="btn-primary" id="hero-get-started">Test Simulator</button>
+          <button class="btn-primary" id="hero-get-started">Scroll to Showcase</button>
           <button class="btn-secondary" id="hero-watch-demo">Play Demo Tones</button>
         </div>
       </section>
 
-      <!-- Live Simulator Workspace -->
-      <section class="demo-section-wrapper" id="simulator-section">
-        <!-- Sidebar Inspector (Control Panel) -->
-        <div class="simulator-inspector">
-          <div class="inspector-header">
-            <span>SDK Diagnostics</span>
-            <span id="inspect-latency">READY</span>
+      <!-- Step Flow Motion Graphics -->
+      <section style="max-width: 1000px; margin: 0 auto 60px; padding: 0 40px;">
+        <div class="step-flow-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; text-align: center;">
+          <div class="step-flow-card" style="background: var(--bg-graphite); border: 1px solid var(--glass-border); border-radius: var(--radius-normal); padding: 24px; box-shadow: var(--glass-shadow);">
+            <div style="font-size: 2rem; margin-bottom: 12px; color: var(--color-cyan);">⌨️</div>
+            <h4 style="margin-bottom: 6px; font-weight: 600;">1. Press Ctrl + Space</h4>
+            <p style="font-size: 0.82rem; color: var(--text-secondary);">Activates the nearly invisible, transparent interaction layer instantly.</p>
           </div>
-
-          <div class="inspector-stats-grid">
-            <div class="stat-widget">
-              <span class="stat-label">Points</span>
-              <span class="stat-value" id="metric-points">0</span>
-            </div>
-            <div class="stat-widget">
-              <span class="stat-label">Latency</span>
-              <span class="stat-value" id="metric-speed">0.0ms</span>
-            </div>
-            <div class="stat-widget" style="grid-column: span 2;">
-              <span class="stat-label">Shape Class</span>
-              <span class="stat-value cyan-glow" id="metric-gesture">None</span>
-            </div>
-            <div class="stat-widget" style="grid-column: span 2;">
-              <span class="stat-label">Coordinates Context</span>
-              <span class="stat-value" id="metric-context" style="font-size: 0.8rem; color: #60A5FA;">Empty screen</span>
-            </div>
+          <div class="step-flow-card" style="background: var(--bg-graphite); border: 1px solid var(--glass-border); border-radius: var(--radius-normal); padding: 24px; box-shadow: var(--glass-shadow);">
+            <div style="font-size: 2rem; margin-bottom: 12px; color: var(--color-cyan);">✍️</div>
+            <h4 style="margin-bottom: 6px; font-weight: 600;">2. Draw Gesture</h4>
+            <p style="font-size: 0.82rem; color: var(--text-secondary);">Circle an image, underline text, or draw a question mark over code.</p>
           </div>
-
-          <div class="logs-title">Engine Process Stream</div>
-          <ul class="simulator-logs" id="log-list">
-            <!-- Dynamic logs stream -->
-          </ul>
-
-          <div class="logs-title">JSON Pipeline Telemetry</div>
-          <pre class="inspector-data-box" id="raw-inspector" style="font-size: 0.7rem; color: #00F1FC; font-family: var(--font-mono); max-height: 140px; overflow-y: auto;">// Ready. Draw on mock tablet to stream...</pre>
-        </div>
-
-        <!-- Simulated Device Frame Bezel -->
-        <div class="simulator-device-container">
-          <div class="tablet-bezel" id="device-container">
-            <!-- Bezel Top bar -->
-            <div class="tablet-top-bar">
-              <div class="tablet-bezel-dots">
-                <div class="bezel-dot"></div>
-                <div class="bezel-dot"></div>
-                <div class="bezel-dot"></div>
-              </div>
-              <span>InkOS Tablet Overlay Emulator</span>
-              <div style="width: 40px;"></div>
-            </div>
-
-            <!-- Dimmed Layer Background on overlay activation -->
-            <div class="inkos-overlay-active" id="dimmed-overlay"></div>
-
-            <!-- Drawing Canvas Layer -->
-            <canvas class="tablet-canvas" id="ink-canvas"></canvas>
-
-            <!-- Scrollable Tablet Screen Content -->
-            <div class="tablet-screen" id="device-screen">
-              <div class="mock-elements-wrapper">
-                
-                <!-- Quick Instructions -->
-                <div class="sim-banner">
-                  💡 <strong>Simulate Intent:</strong> Draw directly over any element below.
-                  <br/>• <strong>Underline</strong> foreign phrases to translate.
-                  <br/>• <strong>Circle</strong> equations to solve, or image products to visually shop.
-                  <br/>• <strong>Draw a Question Mark (?)</strong> over code block definitions to trigger the AI Explainer.
-                </div>
-
-                <!-- Text OCR & Translation -->
-                <div class="article-block">
-                  <div class="sim-section-header">Text & Languages</div>
-                  
-                  <p id="txt-en" class="inkos-target article-p" data-inkos-type="text" data-inkos-content="InkOS introducing Intent Through Ink. Users interact naturally with whatever is already on their screen, preventing app switches.">
-                    InkOS introducing <span class="sim-highlight">Intent Through Ink</span>. Users interact naturally with whatever is already on their screen, preventing app switches.
-                  </p>
-
-                  <p id="txt-fr" class="inkos-target article-p" data-inkos-type="text" data-inkos-content="La vie est belle, pleine de défis mais aussi de moments extraordinaires." data-inkos-metadata='{"language": "fr"}'>
-                    🇫🇷 La vie est belle, pleine de défis mais aussi de moments extraordinaires.
-                  </p>
-
-                  <p id="txt-es" class="inkos-target article-p" data-inkos-type="text" data-inkos-content="El camino del éxito requiere esfuerzo constante, paciencia y una visión clara." data-inkos-metadata='{"language": "es"}'>
-                    🇪🇸 El camino del éxito requiere esfuerzo constante, paciencia y una visión clara.
-                  </p>
-                </div>
-
-                <!-- Equations Math -->
-                <div class="article-block">
-                  <div class="sim-section-header">Calculations</div>
-                  <div class="math-grid">
-                    <div id="eq-1" class="inkos-target math-card" data-inkos-type="math" data-inkos-content="125 * 8">
-                      125 * 8
-                    </div>
-                    <div id="eq-2" class="inkos-target math-card" data-inkos-type="math" data-inkos-content="15 + 45 / 3">
-                      15 + (45 / 3)
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Product visual catalog search -->
-                <div class="article-block">
-                  <div class="sim-section-header">Visual Commerce</div>
-                  <div class="product-display-grid">
-                    
-                    <div class="sim-product-card">
-                      <div id="img-watch" class="inkos-target product-image-frame" data-inkos-type="image" data-inkos-content="Heritage Chronograph Wristwatch" data-inkos-metadata='{"price": "$249.00", "ocrText": "HERITAGE AUTOMATIC"}'>
-                        <img src="/heritage_watch.jpg" alt="Luxury Watch" />
-                      </div>
-                      <div class="product-meta">
-                        <span class="prod-name">Heritage Chrono</span>
-                        <span class="prod-price">$249.00</span>
-                      </div>
-                    </div>
-
-                    <div class="sim-product-card">
-                      <div id="img-sunglasses" class="inkos-target product-image-frame" data-inkos-type="image" data-inkos-content="Aero Aviator Sunglasses" data-inkos-metadata='{"price": "$129.00", "ocrText": "UV400 POLARIZED"}'>
-                        <img src="/cool_sunglasses.jpg" alt="Aviator Sunglasses" />
-                      </div>
-                      <div class="product-meta">
-                        <span class="prod-name">Aero Aviators</span>
-                        <span class="prod-price">$129.00</span>
-                      </div>
-                    </div>
-
-                  </div>
-                </div>
-
-                <!-- Code block sandbox -->
-                <div class="article-block">
-                  <div class="sim-section-header">Developer Sandbox</div>
-                  <pre id="code-block" class="inkos-target code-card" data-inkos-type="code" data-inkos-content="console.log('Running in InkOS sandbox!');
-const price = 249;
-const discount = 0.15;
-const finalPrice = price * (1 - discount);
-console.log('Final Calculated Price:', '$' + finalPrice.toFixed(2));"><code>console.log('Running in InkOS sandbox!');
-const price = 249;
-const discount = 0.15;
-const finalPrice = price * (1 - discount);
-console.log('Final Calculated Price:', '$' + finalPrice.toFixed(2));</code></pre>
-                </div>
-
-                <!-- Table CSV export -->
-                <div class="article-block">
-                  <div class="sim-section-header">Structured Data</div>
-                  <div id="table-card" class="inkos-target table-card" data-inkos-type="table" data-inkos-content="Plugin Statistics Table">
-                    <table class="sim-table">
-                      <thead>
-                        <tr>
-                          <th>Plugin ID</th>
-                          <th>Name</th>
-                          <th>Category</th>
-                          <th>Rating</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr>
-                          <td>finance_plugin</td>
-                          <td>Finance & Markets</td>
-                          <td>Productivity</td>
-                          <td>4.8</td>
-                        </tr>
-                        <tr>
-                          <td>dev_plugin</td>
-                          <td>Developer Toolbox</td>
-                          <td>Utilities</td>
-                          <td>4.9</td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-
-              </div>
-            </div>
+          <div class="step-flow-card" style="background: var(--bg-graphite); border: 1px solid var(--glass-border); border-radius: var(--radius-normal); padding: 24px; box-shadow: var(--glass-shadow);">
+            <div style="font-size: 2rem; margin-bottom: 12px; color: var(--color-cyan);">✨</div>
+            <h4 style="margin-bottom: 6px; font-weight: 600;">3. Get Results</h4>
+            <p style="font-size: 0.82rem; color: var(--text-secondary);">Ink morphing creates a floating Glass Action Pill, resolving in place.</p>
           </div>
         </div>
       </section>
 
-      <!-- Web Landing Features Section -->
-      <section class="features-section">
-        <div class="section-label-center">
-          <h2>Redefining Screen Interactions</h2>
-          <p>InkOS engines pack high-performance local AI capabilities on every desktop client.</p>
+      <!-- Premium Showcase Interaction Sections -->
+      <section class="features-section" id="simulator-section" style="padding-top: 20px; padding-bottom: 100px;">
+        <div class="section-label-center" style="margin-bottom: 48px;">
+          <h2>Interactive Workflow Showcases</h2>
+          <p>Test the overlays live on this webpage. Press <strong>Ctrl + Space</strong> to draw on them, or click "Play Interaction Preview" to watch them run.</p>
         </div>
 
-        <div class="feature-cards-grid">
-          <div class="feature-glass-card">
-            <div class="feature-icon-box">🔢</div>
-            <h3>Math Solver Overlay</h3>
-            <p>Draw a circle around mathematical formulas or handwritten expressions to evaluate results instantly on screen.</p>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(460px, 1fr)); gap: 32px; max-width: 1100px; margin: 0 auto;">
+          
+          <!-- Card 1: Text Translation -->
+          <div class="feature-glass-card" style="padding: 32px; display: flex; flex-direction: column; justify-content: space-between; min-height: 320px;">
+            <div>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                <div class="feature-icon-box" style="margin: 0; background: rgba(0, 122, 255, 0.08); color: var(--color-cyan);">🌐</div>
+                <button class="composer-btn-sm play-showcase-btn" data-workflow="translation" style="max-width: 200px; padding: 6px 12px; margin: 0;">Play Interaction Preview 🎥</button>
+              </div>
+              <h3>Text Translation & Explain</h3>
+              <p style="margin-bottom: 20px; font-size: 0.9rem; color: var(--text-secondary);">Underline foreign text segments to invoke real-time translations.</p>
+              
+              <!-- Target Text Element -->
+              <div id="txt-fr" class="inkos-target" data-inkos-type="text" data-inkos-content="La vie est belle, pleine de défis mais aussi de moments extraordinaires." data-inkos-metadata='{"language": "fr"}' style="background: #FFFFFF; border: 1px solid var(--glass-border); border-radius: var(--radius-inner); padding: 18px; font-size: 0.95rem; line-height: 1.5; color: var(--text-primary);">
+                🇫🇷 La vie est belle, pleine de défis mais aussi de moments extraordinaires.
+              </div>
+            </div>
           </div>
 
-          <div class="feature-glass-card">
-            <div class="feature-icon-box">🌐</div>
-            <h3>In-Context Translation</h3>
-            <p>Underline phrases written in foreign scripts to auto-detect and translate word blocks directly in place.</p>
+          <!-- Card 2: Equation Calculator -->
+          <div class="feature-glass-card" style="padding: 32px; display: flex; flex-direction: column; justify-content: space-between; min-height: 320px;">
+            <div>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                <div class="feature-icon-box" style="margin: 0; background: rgba(0, 122, 255, 0.08); color: var(--color-cyan);">🧮</div>
+                <button class="composer-btn-sm play-showcase-btn" data-workflow="math" style="max-width: 200px; padding: 6px 12px; margin: 0;">Play Interaction Preview 🎥</button>
+              </div>
+              <h3>Instant Equation Solving</h3>
+              <p style="margin-bottom: 20px; font-size: 0.9rem; color: var(--text-secondary);">Draw a circle or loop around mathematical formulas to solve equations.</p>
+              
+              <!-- Target Math Element -->
+              <div id="eq-1" class="inkos-target" data-inkos-type="math" data-inkos-content="125 * 8" style="background: #FFFFFF; border: 1px solid var(--glass-border); border-radius: var(--radius-inner); padding: 22px 24px; font-size: 1.6rem; font-family: var(--font-mono); font-weight: 600; text-align: center; color: var(--color-cyan);">
+                125 * 8
+              </div>
+            </div>
           </div>
 
-          <div class="feature-glass-card">
-            <div class="feature-icon-box">🧠</div>
-            <h3>Concept Explanation</h3>
-            <p>Draw a question mark symbol next to complex paragraphs, diagrams, or lines of code to summon a glass definitions overlay.</p>
+          <!-- Card 3: Visual Search -->
+          <div class="feature-glass-card" style="padding: 32px; display: flex; flex-direction: column; justify-content: space-between; min-height: 420px;">
+            <div>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                <div class="feature-icon-box" style="margin: 0; background: rgba(0, 122, 255, 0.08); color: var(--color-cyan);">🛍️</div>
+                <button class="composer-btn-sm play-showcase-btn" data-workflow="visual" style="max-width: 200px; padding: 6px 12px; margin: 0;">Play Interaction Preview 🎥</button>
+              </div>
+              <h3>Visual Search & Save</h3>
+              <p style="margin-bottom: 20px; font-size: 0.9rem; color: var(--text-secondary);">Lasso circle image cards to visually search similar products and run OCR extraction.</p>
+              
+              <!-- Target Image Element -->
+              <div class="product-display-grid" style="grid-template-columns: 1fr;">
+                <div class="sim-product-card" style="background: transparent; border: none; padding: 0; align-items: stretch; gap: 8px;">
+                  <div id="img-watch" class="inkos-target product-image-frame" data-inkos-type="image" data-inkos-content="Heritage Chronograph Wristwatch" data-inkos-metadata='{"price": "$249.00", "ocrText": "HERITAGE AUTOMATIC"}' style="width: 100%; height: 200px; background: #F3F4F6;">
+                    <img src="/heritage_watch.jpg" alt="Luxury Watch" />
+                  </div>
+                  <div class="product-meta" style="margin-top: 8px; display: flex; justify-content: space-between; font-size: 0.95rem; font-weight: 600;">
+                    <span class="prod-name">Heritage Chrono</span>
+                    <span class="prod-price" style="color: var(--color-cyan);">$249.00</span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
+
+          <!-- Card 4: Developer Sandbox -->
+          <div class="feature-glass-card" style="padding: 32px; display: flex; flex-direction: column; justify-content: space-between; min-height: 420px;">
+            <div>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                <div class="feature-icon-box" style="margin: 0; background: rgba(0, 122, 255, 0.08); color: var(--color-cyan);">💻</div>
+                <button class="composer-btn-sm play-showcase-btn" data-workflow="code" style="max-width: 200px; padding: 6px 12px; margin: 0;">Play Interaction Preview 🎥</button>
+              </div>
+              <h3>Developer Code Explainer & Debugger</h3>
+              <p style="margin-bottom: 20px; font-size: 0.9rem; color: var(--text-secondary);">Draw a question mark over code lines to analyze execution flow, inspect bugs, or generate unit test specs.</p>
+              
+              <!-- Target Code Element -->
+              <pre id="code-block" class="inkos-target code-card" data-inkos-type="code" data-inkos-content="console.log('Running in InkOS sandbox!');
+const price = 249;
+const discount = 0.15;
+const finalPrice = price * (1 - discount);
+console.log('Final Calculated Price:', '$' + finalPrice.toFixed(2));" style="border-radius: var(--radius-inner); font-size: 0.78rem; max-height: 200px; overflow-y: auto; background: #F8FAFC; color: #1E293B; border: 1px solid rgba(0,0,0,0.06); padding: 18px; font-family: var(--font-mono); line-height: 1.5;"><code>console.log('Running in InkOS sandbox!');
+const price = 249;
+const discount = 0.15;
+const finalPrice = price * (1 - discount);
+console.log('Final Calculated Price:', '$' + finalPrice.toFixed(2));</code></pre>
+            </div>
+          </div>
+
         </div>
       </section>
     </div>
@@ -263,11 +179,34 @@ console.log('Final Calculated Price:', '$' + finalPrice.toFixed(2));</code></pre
             <button class="dash-nav-btn" data-sub-tab="gestures">Gestures</button>
             <button class="dash-nav-btn" data-sub-tab="plugins">Plugins</button>
             <button class="dash-nav-btn" data-sub-tab="models">AI Models</button>
+            <button class="dash-nav-btn" data-sub-tab="diagnostics">Diagnostics</button>
           </nav>
 
           <!-- Main Settings Form Viewports -->
           <div class="settings-viewport">
             
+            <!-- Live diagnostics widgets dashboard -->
+            <div class="diagnostics-banner-grid">
+              <div class="diag-widget-card">
+                <span class="stat-label">System Health</span>
+                <span class="diag-val-success" id="diag-sys-health">99.8% (Online)</span>
+              </div>
+              <div class="diag-widget-card">
+                <span class="stat-label">AI Pipeline</span>
+                <span class="diag-val-info" id="diag-ai-status">Active (Local Model)</span>
+              </div>
+              <div class="diag-widget-card">
+                <span class="stat-label">OCR & Web Search</span>
+                <span class="diag-val-success">Active</span>
+              </div>
+            </div>
+
+            <!-- Settings Search filter -->
+            <div class="settings-search-container">
+              <span class="settings-search-icon">🔍</span>
+              <input type="text" id="settings-search-bar" class="settings-search-input" placeholder="Search settings parameters (e.g. shortcut, sound)..." />
+            </div>
+
             <!-- SUB-TAB: GENERAL -->
             <div id="sub-tab-general" class="settings-group">
               <h2>General Preferences</h2>
@@ -314,17 +253,52 @@ console.log('Final Calculated Price:', '$' + finalPrice.toFixed(2));</code></pre
               <div class="settings-row-inline">
                 <div class="settings-label-wrapper">
                   <label>Circle Circularity Threshold</label>
-                  <span class="settings-desc">Sensibility coefficient to differentiate circles from rectangle loops.</span>
+                  <span class="settings-desc">Sensibility coefficient to differentiate circles from loops.</span>
                 </div>
                 <input type="text" class="text-input" value="0.20 (Optimal)" disabled style="text-align: right; max-width: 140px;" />
               </div>
 
-              <div class="settings-row-inline">
+              <div class="settings-row-inline" style="margin-bottom: 24px;">
                 <div class="settings-label-wrapper">
                   <label>Underline Aspect Ratio</label>
                   <span class="settings-desc">Minimum width-to-height ratio requirement to validate underlines.</span>
                 </div>
                 <input type="text" class="text-input" value="2.50" disabled style="text-align: right; max-width: 140px;" />
+              </div>
+
+              <h2>Interactive Gesture Library</h2>
+              <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 15px;">Supported standard and custom gestures:</p>
+              <div class="gesture-library-grid" id="gesture-library-grid">
+                <!-- Dynamic cards with previews will be injected here by main.ts -->
+              </div>
+
+              <h2>Gesture Composer</h2>
+              <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 15px;">Draw a single stroke on the pad to record a new custom shape:</p>
+              
+              <div class="gesture-composer-card">
+                <div class="composer-workspace">
+                  <div class="composer-pad-container">
+                     <canvas class="composer-canvas" id="composer-canvas"></canvas>
+                     <div class="composer-controls" style="margin-top: 8px;">
+                       <button class="composer-btn-sm" id="composer-clear-btn" style="width: 100%;">Clear Workspace Pad</button>
+                     </div>
+                  </div>
+                  <div class="composer-form">
+                     <div class="settings-row" style="margin-bottom: 10px;">
+                       <label style="font-size: 0.82rem; font-weight: 600; color: var(--text-primary);">Gesture Call-Sign Name</label>
+                       <input type="text" id="composer-name-input" class="text-input" placeholder="e.g. triangle, star" style="max-width: 100%; font-size: 0.8rem; padding: 8px 12px;" />
+                     </div>
+                     <div class="settings-row" style="margin-bottom: 14px;">
+                       <label style="font-size: 0.82rem; font-weight: 600; color: var(--text-primary);">Assigned System Shortcut Action</label>
+                       <select id="composer-action-select" class="select-input" style="max-width: 100%; font-size: 0.8rem; padding: 8px 12px;">
+                         <option value="canvas_clear">Clear Screen Overlay</option>
+                         <option value="open_settings">Navigate to Settings Dashboard</option>
+                         <option value="math_solve">Trigger Math Calculation</option>
+                       </select>
+                     </div>
+                     <button class="btn-primary" id="composer-save-btn" style="width: 100%; font-size: 0.85rem; padding: 10px; border-radius: var(--radius-inner);">Save and Register Shape</button>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -375,6 +349,53 @@ console.log('Final Calculated Price:', '$' + finalPrice.toFixed(2));</code></pre
                   <option value="gpt-4o">OpenAI GPT-4o</option>
                   <option value="ollama-local">Ollama Local (llama3)</option>
                 </select>
+              </div>
+            </div>
+
+            <!-- SUB-TAB: DIAGNOSTICS -->
+            <div id="sub-tab-diagnostics" class="settings-group" style="display: none; flex-direction: column;">
+              <h2>SDK Developer Diagnostics</h2>
+              <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 10px;">Monitor real-time gestures heuristics, coordinate sample logs, and latency telemetry streams.</p>
+              
+              <div class="simulator-inspector" style="width: 100%; max-height: none; box-shadow: none; border: 1px solid var(--glass-border); background: transparent; padding: 18px; margin-top: 10px;">
+                <div class="inspector-header" style="border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: 8px; font-size: 0.9rem; font-weight: 600; color: var(--text-primary); display: flex; justify-content: space-between;">
+                  <span>SDK Diagnostics Telemetry</span>
+                  <span id="inspect-latency" style="color: var(--color-cyan);">READY</span>
+                </div>
+
+                <div class="inspector-stats-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 14px; margin-bottom: 14px;">
+                  <div class="stat-widget">
+                    <span class="stat-label">Points Count</span>
+                    <span class="stat-value" id="metric-points">0</span>
+                  </div>
+                  <div class="stat-widget">
+                    <span class="stat-label">Latency Speed</span>
+                    <span class="stat-value" id="metric-speed">0.0ms</span>
+                  </div>
+                  <div class="stat-widget">
+                    <span class="stat-label">Gesture Recognized</span>
+                    <span class="stat-value cyan-glow" id="metric-gesture">None</span>
+                  </div>
+                  <div class="stat-widget">
+                    <span class="stat-label">Context Element</span>
+                    <span class="stat-value" id="metric-context" style="font-size: 0.8rem; color: #007AFF;">Empty screen</span>
+                  </div>
+                </div>
+
+                <div class="logs-title" style="margin-top: 14px; font-weight: 600; font-size: 0.8rem; text-transform: uppercase; color: var(--text-secondary);">Engine Process Stream</div>
+                <ul class="simulator-logs" id="log-list" style="margin-top: 8px; border: 1px solid var(--glass-border); border-radius: 8px; padding: 12px; max-height: 180px; overflow-y: auto; background: rgba(0,0,0,0.01); height: 180px;">
+                  <!-- Dynamic logs stream -->
+                </ul>
+
+                <div class="logs-title" style="margin-top: 14px; font-weight: 600; font-size: 0.8rem; text-transform: uppercase; color: var(--text-secondary);">JSON Pipeline Telemetry</div>
+                <pre class="inspector-data-box" id="raw-inspector" style="font-size: 0.7rem; color: #007AFF; font-family: var(--font-mono); max-height: 120px; overflow-y: auto; margin-top: 8px; border: 1px solid var(--glass-border); border-radius: 8px; padding: 12px; height: 120px; background: rgba(0,0,0,0.01);">// Ready. Draw anywhere on screen to stream...</pre>
+
+                <div class="logs-title" style="margin-top: 14px; font-weight: 600; font-size: 0.8rem; text-transform: uppercase; color: var(--text-secondary);">Recent AI Actions (Replay Log)</div>
+                <ul class="activity-list" id="activity-history-list" style="margin-top: 8px;">
+                  <li class="activity-item" style="color: var(--text-secondary); text-align: center; padding: 12px; font-style: italic;">
+                    No recent actions. Draw gestures on screen.
+                  </li>
+                </ul>
               </div>
             </div>
 

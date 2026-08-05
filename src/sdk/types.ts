@@ -15,7 +15,8 @@ export type GestureType =
   | 'cross'
   | 'question'
   | 'tick'
-  | 'unknown';
+  | 'unknown'
+  | string;
 
 export interface BoundingBox {
   x: number;
@@ -80,4 +81,21 @@ export interface InkOSConfig {
   activeAIModel: string;
   activePlugins: string[];
 }
+
+export interface ActivityLogEntry {
+  id: string;
+  shape: string;
+  contextType: string;
+  actionLabel: string;
+  timestamp: string;
+  status: 'success' | 'failed';
+  points: Point[];
+}
+
+export interface CustomGestureTemplate {
+  name: string;
+  normalizedPoints: Point[];
+  actionId: string;
+}
+
 

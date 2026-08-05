@@ -1,4 +1,4 @@
-import type { Point, Gesture, GestureType, BoundingBox } from './types';
+import type { Point, Gesture, GestureType, BoundingBox, CustomGestureTemplate } from './types';
 
 export class GestureEngine {
   /**
@@ -12,6 +12,12 @@ export class GestureEngine {
         bounds: this.getBoundingBox(points),
         points
       };
+    }
+
+    // 0. Check custom template registry first
+    const customMatch = this.recognizeCustom(points);
+    if (customMatch) {
+      return customMatch;
     }
 
     const bounds = this.getBoundingBox(points);
@@ -266,5 +272,108 @@ export class GestureEngine {
       }
     }
     return false;
+  }
+
+  // --- CUSTOM GESTURE TEMPLATE MATCHING ALGORITHMS ---
+
+  private static resample(points: Point[], n: number): Point[] {
+    const pathLen = this.getPathLength(points);
+    if (pathLen === 0) {
+      // Avoid division by zero, return array of first point
+      return Array(n).fill(0).map(() => ({ ...points[0] }));
+    }
+    const I = pathLen / (n - 1);
+    let D = 0.0;
+    const newPoints: Point[] = [points[0]];
+    const pts = [...points];
+
+    for (let i = 1; i < pts.length; i++) {
+      const d = this.getDistance(pts[i - 1], pts[i]);
+      if (D + d >= I) {
+        const qx = pts[i - 1].x + ((I - D) / d) * (pts[i].x - pts[i - 1].x);
+        const qy = pts[i - 1].y + ((I - D) / d) * (pts[i].y - pts[i - 1].y);
+        const q = { x: qx, y: qy, t: pts[i].t };
+        newPoints.push(q);
+        pts.splice(i, 0, q); // insert q as next point
+        D = 0.0;
+      } else {
+        D += d;
+      }
+    }
+
+    while (newPoints.length < n) {
+      newPoints.push({ ...points[points.length - 1] });
+    }
+    if (newPoints.length > n) {
+      newPoints.length = n;
+    }
+    return newPoints;
+  }
+
+  private static translateTo(points: Point[], centroid: Point): Point[] {
+    return points.map(p => ({ x: p.x - centroid.x, y: p.y - centroid.y, t: p.t }));
+  }
+
+  private static scaleTo(points: Point[], size: number): Point[] {
+    const box = this.getBoundingBox(points);
+    const boxWidth = Math.max(1, box.width);
+    const boxHeight = Math.max(1, box.height);
+    return points.map(p => ({
+      x: p.x * (size / boxWidth),
+      y: p.y * (size / boxHeight),
+      t: p.t
+    }));
+  }
+
+  public static normalizePath(points: Point[]): Point[] {
+    const resampled = this.resample(points, 32);
+    const centroid = this.getCentroid(resampled);
+    const translated = this.translateTo(resampled, centroid);
+    const scaled = this.scaleTo(translated, 100);
+    return scaled;
+  }
+
+  private static pathDistance(pts1: Point[], pts2: Point[]): number {
+    let d = 0;
+    const len = Math.min(pts1.length, pts2.length);
+    for (let i = 0; i < len; i++) {
+      d += this.getDistance(pts1[i], pts2[i]);
+    }
+    return d / len;
+  }
+
+  private static recognizeCustom(points: Point[]): Gesture | null {
+    try {
+      const templatesStr = localStorage.getItem('inkos_custom_gestures');
+      if (!templatesStr) return null;
+      const templates = JSON.parse(templatesStr) as CustomGestureTemplate[];
+      if (templates.length === 0) return null;
+
+      const normalizedInput = this.normalizePath(points);
+      let bestTemplate: CustomGestureTemplate | null = null;
+      let lowestScore = Infinity;
+
+      for (const t of templates) {
+        const dist = this.pathDistance(normalizedInput, t.normalizedPoints);
+        if (dist < lowestScore) {
+          lowestScore = dist;
+          bestTemplate = t;
+        }
+      }
+
+      // Distance threshold of 18.0 normalized coordinates
+      if (bestTemplate && lowestScore < 18.0) {
+        const bounds = this.getBoundingBox(points);
+        return {
+          type: bestTemplate.name.toLowerCase(),
+          confidence: parseFloat(Math.max(0.6, 1.0 - (lowestScore / 30)).toFixed(2)),
+          bounds,
+          points
+        };
+      }
+    } catch (e) {
+      console.error('Failed to recognize custom template', e);
+    }
+    return null;
   }
 }

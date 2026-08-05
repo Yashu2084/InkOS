@@ -13,8 +13,15 @@ export class ControlCenter {
     this.orb = orbElement;
     this.panel = panelElement;
 
+    this.setOrbState('idle');
     this.initEvents(onActionClick);
   }
+
+  public setOrbState(state: 'idle' | 'listening' | 'thinking' | 'executing' | 'completed'): void {
+    this.orb.classList.remove('orb-idle', 'orb-listening', 'orb-thinking', 'orb-executing', 'orb-completed');
+    this.orb.classList.add(`orb-${state}`);
+  }
+
 
   private initEvents(onActionClick: (actionId: string) => void): void {
     // Toggle Control Center panel when clicking the glass orb

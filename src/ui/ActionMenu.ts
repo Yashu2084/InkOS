@@ -76,26 +76,56 @@ export class ActionMenu {
   }
 
   /**
-   * Displays loading micro-animation when an action executes.
+   * Displays loading micro-animation steps when an action executes.
    */
-  public showLoading(position: { x: number; y: number }): void {
+  public async showLoading(position: { x: number; y: number }, steps: string[] = [
+    'Understanding Context...',
+    'Recognizing Gesture...',
+    'Analyzing Content...',
+    'Executing Action...'
+  ]): Promise<void> {
     this.hide();
     
     const loader = document.createElement('div');
     loader.className = 'vision-action-pill';
-    loader.style.width = '120px';
-    loader.innerHTML = `
-      <div class="loading-box">
-        <div class="loader-dot"></div>
-        <div class="loader-dot"></div>
-        <div class="loader-dot"></div>
-      </div>
-    `;
+    loader.style.width = '240px';
+    loader.style.padding = '8px';
+    
+    const stepsContainer = document.createElement('div');
+    stepsContainer.style.display = 'flex';
+    stepsContainer.style.flexDirection = 'column';
+    stepsContainer.style.gap = '4px';
+    loader.appendChild(stepsContainer);
     
     this.container.appendChild(loader);
     this.menuElement = loader;
     this.adjustElementPosition(loader, position);
+
+    // Render and resolve processing phases sequentially
+    for (let i = 0; i < steps.length; i++) {
+      if (!this.menuElement) break;
+      
+      const stepRow = document.createElement('div');
+      stepRow.className = 'processing-step-row';
+      stepRow.innerHTML = `
+        <div class="processing-step-spinner"></div>
+        <span>${steps[i]}</span>
+      `;
+      stepsContainer.appendChild(stepRow);
+      
+      // Adaptive time progression
+      await new Promise(resolve => setTimeout(resolve, 140));
+      
+      const spinner = stepRow.querySelector('.processing-step-spinner');
+      if (spinner) {
+        spinner.className = 'processing-step-check';
+        spinner.innerHTML = '✓';
+      }
+    }
+    
+    await new Promise(resolve => setTimeout(resolve, 80));
   }
+
 
   /**
    * Shows action output overlay.

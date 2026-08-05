@@ -43,13 +43,9 @@ export class CanvasOverlay {
   }
 
   public resizeCanvas(): void {
-    const rect = this.canvas.parentElement?.getBoundingClientRect();
-    if (rect) {
-      this.canvas.width = rect.width;
-      // Offset for device top-bar height (35px)
-      this.canvas.height = rect.height - 35;
-      this.clearCanvas();
-    }
+    this.canvas.width = window.innerWidth;
+    this.canvas.height = window.innerHeight;
+    this.clearCanvas();
   }
 
   public clearCanvas(): void {
@@ -57,6 +53,12 @@ export class CanvasOverlay {
     this.points = [];
     this.currentStroke = [];
   }
+
+  public drawPoints(pts: Point[], alpha = 1.0): void {
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    this.drawPointsPath(pts, this.inkColor, 3.5, alpha);
+  }
+
 
   private initEvents(): void {
     // Pointer movements for drawing and custom cursor positioning
@@ -194,31 +196,46 @@ export class CanvasOverlay {
     this.drawPointsPath(this.points, this.inkColor, 3.5);
   }
 
-  private drawPointsPath(pts: Point[], color: string, width: number, alpha = 1.0): void {
+  private drawPointsPath(pts: Point[], color: string, baseWidth: number, alpha = 1.0): void {
     if (pts.length < 2) return;
 
     this.ctx.save();
     this.ctx.strokeStyle = color;
-    this.ctx.lineWidth = width;
     this.ctx.lineCap = 'round';
     this.ctx.lineJoin = 'round';
     this.ctx.globalAlpha = alpha;
     
     // Glowing cyan line overlay shadow
     this.ctx.shadowColor = color;
-    this.ctx.shadowBlur = 8;
+    this.ctx.shadowBlur = 6;
 
-    this.ctx.beginPath();
-    this.ctx.moveTo(pts[0].x, pts[0].y);
+    for (let i = 1; i < pts.length; i++) {
+      const p1 = pts[i - 1];
+      const p2 = pts[i];
+      
+      const dist = Math.sqrt(Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2));
+      const t2 = p2.t ?? Date.now();
+      const t1 = p1.t ?? (t2 - 10);
+      const time = Math.max(1, t2 - t1);
+      const speed = dist / time;
 
-    for (let i = 1; i < pts.length - 1; i++) {
-      const xc = (pts[i].x + pts[i + 1].x) / 2;
-      const yc = (pts[i].y + pts[i + 1].y) / 2;
-      this.ctx.quadraticCurveTo(pts[i].x, pts[i].y, xc, yc);
+      // Slower swipe = thicker ink, faster swipe = thinner tapered ink
+      const segmentWidth = Math.max(1.8, Math.min(5.5, baseWidth * 1.5 - speed * 1.6));
+
+      this.ctx.lineWidth = segmentWidth;
+      this.ctx.beginPath();
+      this.ctx.moveTo(p1.x, p1.y);
+
+      if (i < pts.length - 1) {
+        const xc = (p2.x + pts[i + 1].x) / 2;
+        const yc = (p2.y + pts[i + 1].y) / 2;
+        this.ctx.quadraticCurveTo(p2.x, p2.y, xc, yc);
+      } else {
+        this.ctx.lineTo(p2.x, p2.y);
+      }
+      this.ctx.stroke();
     }
-
-    this.ctx.lineTo(pts[pts.length - 1].x, pts[pts.length - 1].y);
-    this.ctx.stroke();
+    
     this.ctx.restore();
   }
 
