@@ -2,6 +2,7 @@ export interface Point {
   x: number;
   y: number;
   t?: number;
+  pressure?: number;
 }
 
 export type Stroke = Point[];

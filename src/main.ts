@@ -256,6 +256,21 @@ if (heroWatchDemo) {
   });
 }
 
+const heroTryInkos = document.getElementById('hero-try-inkos') as HTMLElement;
+if (heroTryInkos) {
+  heroTryInkos.addEventListener('click', (e) => {
+    e.stopPropagation();
+    AudioSynth.playPop();
+    toggleInkOverlay(true);
+    inspector.addLog('system', 'Demo mode activated. User can now draw around targets inside the workspace.');
+  });
+}
+
+// Listen for keyboard cancel triggers from floating menus
+window.addEventListener('inkos-cancel', () => {
+  toggleInkOverlay(false);
+});
+
 // Custom select bindings to trigger sound
 const selects = document.querySelectorAll('.select-input');
 selects.forEach(sel => {
@@ -294,31 +309,58 @@ async function handleGestureComplete(points: Point[]): Promise<void> {
     return;
   }
 
-  // Highlight the matched element
+  // Highlight the matched element immediately
   if (context.type !== 'empty' && context.element) {
     showElementHighlight(context.element);
   }
 
-  // Calculate gesture centroid inside canvas coordinate system (client coordinates)
+  // Calculate gesture centroid (viewport relative coordinates)
   const centroidX = gesture.points.reduce((sum, p) => sum + p.x, 0) / gesture.points.length;
   const centroidY = gesture.points.reduce((sum, p) => sum + p.y, 0) / gesture.points.length;
 
-  // Translate client coordinates to page-relative coordinates by adding scroll offsets
-  const menuPos = {
-    x: centroidX + window.scrollX,
-    y: centroidY + window.scrollY
-  };
+  // Determine Action Pill placement coordinates
+  let pillX = centroidX;
+  let pillY = centroidY;
+  let targetBoundsPage: { x: number; y: number; width: number; height: number } | undefined = undefined;
 
-  // Check config default execution mode
-  const modeSelect = document.getElementById('mode-select') as HTMLSelectElement;
-  const isAutoMode = modeSelect && modeSelect.value === 'auto';
+  if (context.type !== 'empty' && context.element) {
+    const targetRect = context.element.getBoundingClientRect();
+    targetBoundsPage = {
+      x: targetRect.left + window.scrollX,
+      y: targetRect.top + window.scrollY,
+      width: targetRect.width,
+      height: targetRect.height
+    };
 
-  // 5. Execute action or show menu
-  const executeIntent = async (selectedIntent: Intent) => {
+    // Calculate pill position (viewport relative)
+    let left = targetRect.left + targetRect.width + 12;
+    let top = targetRect.top;
+    const elWidth = 250;
+    const elHeight = 180;
+    const screenWidth = window.innerWidth;
+    const screenHeight = window.innerHeight;
+
+    if (left + elWidth > screenWidth) {
+      left = targetRect.left - elWidth - 12;
+    }
+    if (left < 0) {
+      left = targetRect.left + (targetRect.width - elWidth) / 2;
+      top = targetRect.top + targetRect.height + 12;
+    }
+    if (top + elHeight > screenHeight) {
+      top = targetRect.top - elHeight - 12;
+    }
+
+    pillX = Math.max(12, Math.min(screenWidth - elWidth - 12, left));
+    pillY = Math.max(12, Math.min(screenHeight - elHeight - 12, top));
+  }
+
+  // 5. Execute action routine
+  const executeIntent = async (selectedIntent: Intent, executePosPage: { x: number; y: number }) => {
     if (controlCenter) controlCenter.setOrbState('thinking');
     
     // Sequential progress status steps
-    await actionMenu.showLoading(menuPos, [
+    await actionMenu.showLoading(executePosPage, [
       'Understanding Context...',
       'Recognizing Gesture...',
       'Analyzing Content...',
@@ -360,20 +402,17 @@ async function handleGestureComplete(points: Point[]): Promise<void> {
         AudioSynth.playClick();
 
         const targetElement = context.element;
-        const targetRect = targetElement.getBoundingClientRect();
+        let resultPosPage = { ...executePosPage };
         
-        // Calculate page-relative coordinates next to the target element bounds
-        const resultPos = {
-          x: targetRect.left + window.scrollX + targetRect.width / 2,
-          y: targetRect.top + window.scrollY + targetRect.height + 12
-        };
-
-        if (context.type === 'empty') {
-          resultPos.x = menuPos.x;
-          resultPos.y = menuPos.y;
+        if (context.type !== 'empty' && targetElement) {
+          const targetRect = targetElement.getBoundingClientRect();
+          resultPosPage = {
+            x: targetRect.left + window.scrollX + targetRect.width / 2,
+            y: targetRect.top + window.scrollY + targetRect.height + 12
+          };
         }
 
-        actionMenu.showResult(result.displayHtml, resultPos, () => {
+        actionMenu.showResult(result.displayHtml, resultPosPage, () => {
           removeElementHighlight();
           inspector.clearInspector();
         });
@@ -399,16 +438,29 @@ async function handleGestureComplete(points: Point[]): Promise<void> {
     }
   };
 
-  if (isAutoMode && intents.length > 0) {
-    // In immediate execution mode, bypass the menu and execute top intent automatically
-    inspector.addLog('system', `Default execution mode set to IMMEDIATE. Auto-triggering: ${intents[0].label}`);
-    await executeIntent(intents[0]);
-  } else {
-    // Show Vision Pro pill selection menu
-    actionMenu.show(intents, menuPos, async (intent) => {
-      await executeIntent(intent);
-    });
-  }
+  // Trigger coordinate morphing towards the Action Pill center coordinates
+  canvasOverlay.animateMorph(pillX, pillY, async () => {
+    // Check config default execution mode
+    const modeSelect = document.getElementById('mode-select') as HTMLSelectElement;
+    const isAutoMode = modeSelect && modeSelect.value === 'auto';
+
+    // Page relative coordinate where the pill menu appears
+    const pillPosPage = {
+      x: pillX + window.scrollX,
+      y: pillY + window.scrollY
+    };
+
+    if (isAutoMode && intents.length > 0) {
+      // In immediate execution mode, bypass the menu and execute top intent automatically
+      inspector.addLog('system', `Default execution mode set to IMMEDIATE. Auto-triggering: ${intents[0].label}`);
+      await executeIntent(intents[0], pillPosPage);
+    } else {
+      // Show Vision Pro pill selection menu
+      actionMenu.show(intents, pillPosPage, async (intent) => {
+        await executeIntent(intent, pillPosPage);
+      }, targetBoundsPage);
+    }
+  });
 }
 
 // --- MASTER OS UI/UX ENHANCEMENTS ENGINE CORES ---

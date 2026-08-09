@@ -16,7 +16,7 @@ export class CanvasOverlay {
   
   // Timeout for detecting multi-stroke gestures (like crosses or question marks)
   private strokeEndTimeout: number | null = null;
-  private readonly MULTI_STROKE_DELAY = 300; // ms to wait for another stroke
+  private readonly MULTI_STROKE_DELAY = 350; // ms to wait for another stroke
 
   // Fade parameters
   private fadeInterval: number | null = null;
@@ -24,11 +24,11 @@ export class CanvasOverlay {
   private fadePoints: Point[] = [];
 
   // Config parameters
-  private inkColor = '#00F1FC'; // Electric Cyan
+  private inkColor = '#00F1FC'; // Electric Cyan accent color
 
   constructor(canvasElement: HTMLCanvasElement, onGestureComplete: (points: Point[]) => void) {
     this.canvas = canvasElement;
-    const context = this.canvas.getContext('2d');
+    const context = this.canvas.getContext('2d', { desynchronized: true }); // Request low input latency context
     if (!context) throw new Error('Could not get 2D context from canvas');
     this.ctx = context;
     
@@ -42,9 +42,17 @@ export class CanvasOverlay {
     window.addEventListener('resize', () => this.resizeCanvas());
   }
 
+  /**
+   * Resizes canvas supporting High-DPI / Retina screens.
+   */
   public resizeCanvas(): void {
-    this.canvas.width = window.innerWidth;
-    this.canvas.height = window.innerHeight;
+    const dpr = window.devicePixelRatio || 1;
+    this.canvas.width = window.innerWidth * dpr;
+    this.canvas.height = window.innerHeight * dpr;
+    this.canvas.style.width = `${window.innerWidth}px`;
+    this.canvas.style.height = `${window.innerHeight}px`;
+    
+    this.ctx.scale(dpr, dpr);
     this.clearCanvas();
   }
 
@@ -58,7 +66,6 @@ export class CanvasOverlay {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     this.drawPointsPath(pts, this.inkColor, 3.5, alpha);
   }
-
 
   private initEvents(): void {
     // Pointer movements for drawing and custom cursor positioning
@@ -137,7 +144,7 @@ export class CanvasOverlay {
     const lastPt = this.currentStroke[this.currentStroke.length - 1];
     if (lastPt) {
       const dist = Math.sqrt(Math.pow(pt.x - lastPt.x, 2) + Math.pow(pt.y - lastPt.y, 2));
-      if (dist > 1.5) {
+      if (dist > 1.2) {
         this.currentStroke.push(pt);
         this.points.push(pt);
         this.drawSmoothStroke();
@@ -161,32 +168,33 @@ export class CanvasOverlay {
         // Play action complete audio pop/click
         AudioSynth.playClick();
         
-        // Start fading drawing path in background
-        this.startFade([...gesturePoints]);
-        
-        // Callback
+        // Callback to let the application process intent & determine the Action Pill position
         this.onGestureCompleteCallback(gesturePoints);
-        
-        this.points = [];
-        this.currentStroke = [];
       }, this.MULTI_STROKE_DELAY);
     }
   }
 
   private getPointFromEvent(e: PointerEvent): Point {
     const rect = this.canvas.getBoundingClientRect();
+    // Normalize pressure (default to 0.5 if not supported/zero)
+    const pressure = e.pressure !== undefined && e.pressure > 0 ? e.pressure : 0.5;
     return {
       x: e.clientX - rect.left,
       y: e.clientY - rect.top,
-      t: Date.now()
+      t: Date.now(),
+      pressure
     };
   }
 
   private drawStartPoint(pt: Point): void {
+    this.ctx.save();
     this.ctx.beginPath();
     this.ctx.arc(pt.x, pt.y, 2.5, 0, Math.PI * 2);
     this.ctx.fillStyle = this.inkColor;
+    this.ctx.shadowColor = this.inkColor;
+    this.ctx.shadowBlur = 6;
     this.ctx.fill();
+    this.ctx.restore();
   }
 
   private drawSmoothStroke(): void {
@@ -196,6 +204,10 @@ export class CanvasOverlay {
     this.drawPointsPath(this.points, this.inkColor, 3.5);
   }
 
+  /**
+   * Draws a beautiful calligraphic line using speed-based width adjustments,
+   * physical stylus pressure simulation, and smooth tapering at the start and end of strokes.
+   */
   private drawPointsPath(pts: Point[], color: string, baseWidth: number, alpha = 1.0): void {
     if (pts.length < 2) return;
 
@@ -203,13 +215,14 @@ export class CanvasOverlay {
     this.ctx.strokeStyle = color;
     this.ctx.lineCap = 'round';
     this.ctx.lineJoin = 'round';
-    this.ctx.globalAlpha = alpha;
+    this.ctx.globalAlpha = alpha * 0.85; // Slightly translucent liquid feel
     
-    // Glowing cyan line overlay shadow
     this.ctx.shadowColor = color;
-    this.ctx.shadowBlur = 6;
+    this.ctx.shadowBlur = 5;
 
-    for (let i = 1; i < pts.length; i++) {
+    const totalPoints = pts.length;
+
+    for (let i = 1; i < totalPoints; i++) {
       const p1 = pts[i - 1];
       const p2 = pts[i];
       
@@ -219,32 +232,96 @@ export class CanvasOverlay {
       const time = Math.max(1, t2 - t1);
       const speed = dist / time;
 
-      // Slower swipe = thicker ink, faster swipe = thinner tapered ink
-      const segmentWidth = Math.max(1.8, Math.min(5.5, baseWidth * 1.5 - speed * 1.6));
+      // Base width calculations combining velocity (slower drawing = thicker lines)
+      let segmentWidth = Math.max(1.8, Math.min(6.5, baseWidth * 1.5 - speed * 1.6));
 
-      this.ctx.lineWidth = segmentWidth;
+      // Incorporate device pressure sensitivity if available
+      const pressureVal = p2.pressure !== undefined ? p2.pressure : 0.5;
+      segmentWidth = segmentWidth * (0.6 + pressureVal * 0.8);
+
+      // Natural stroke tapering (first 6 and last 6 points fade out to 0 width)
+      const taperPoints = 6;
+      if (i < taperPoints) {
+        segmentWidth *= (i / taperPoints);
+      } else if (totalPoints - i < taperPoints) {
+        segmentWidth *= ((totalPoints - i) / taperPoints);
+      }
+
+      this.ctx.lineWidth = Math.max(0.5, segmentWidth);
       this.ctx.beginPath();
       this.ctx.moveTo(p1.x, p1.y);
 
-      if (i < pts.length - 1) {
+      if (i < totalPoints - 1) {
+        // Smooth Bezier interpolation
         const xc = (p2.x + pts[i + 1].x) / 2;
         const yc = (p2.y + pts[i + 1].y) / 2;
         this.ctx.quadraticCurveTo(p2.x, p2.y, xc, yc);
       } else {
         this.ctx.lineTo(p2.x, p2.y);
       }
+      
       this.ctx.stroke();
     }
     
     this.ctx.restore();
   }
 
-  // --- FADE OUT ANIMATION ---
+  /**
+   * Animates/morphs the complete drawing stroke toward the center of the Action Pill position.
+   */
+  public animateMorph(targetX: number, targetY: number, callback: () => void): void {
+    this.stopFade();
+    
+    const pointsToAnimate = [...this.points];
+    this.points = [];
+    this.currentStroke = [];
+    
+    if (pointsToAnimate.length === 0) {
+      callback();
+      return;
+    }
 
-  private startFade(pointsToFade: Point[]): void {
+    const startTime = performance.now();
+    const duration = 280; // Fast and responsive (280ms)
+    
+    const animStep = (now: number) => {
+      const elapsed = now - startTime;
+      const pct = Math.min(1, elapsed / duration);
+      
+      // Fast start and deceleration pull curve (ease-out cubic)
+      const ease = 1 - Math.pow(1 - pct, 3);
+      
+      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+      
+      if (pct >= 1) {
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        callback();
+      } else {
+        // Move all coordinates in the path toward the target coordinates
+        const animatedPoints = pointsToAnimate.map(p => ({
+          x: p.x + (targetX - p.x) * ease,
+          y: p.y + (targetY - p.y) * ease,
+          t: p.t,
+          pressure: p.pressure
+        }));
+        
+        // Draw the shrinking stroke path with fading opacity
+        this.drawPointsPath(animatedPoints, this.inkColor, 3.5, 1.0 - pct);
+        this.fadeInterval = requestAnimationFrame(animStep);
+      }
+    };
+    
+    this.fadeInterval = requestAnimationFrame(animStep);
+  }
+
+  // --- STANDARD BACKGROUND FADE OUT FALLBACK ---
+
+  public startFade(pointsToFade: Point[] = [...this.points]): void {
     this.stopFade();
     this.fadePoints = pointsToFade;
     this.fadeAlpha = 1.0;
+    this.points = [];
+    this.currentStroke = [];
 
     const fadeStep = () => {
       this.fadeAlpha -= 0.08;
@@ -262,7 +339,7 @@ export class CanvasOverlay {
     this.fadeInterval = requestAnimationFrame(fadeStep);
   }
 
-  private stopFade(): void {
+  public stopFade(): void {
     if (this.fadeInterval) {
       cancelAnimationFrame(this.fadeInterval);
       this.fadeInterval = null;

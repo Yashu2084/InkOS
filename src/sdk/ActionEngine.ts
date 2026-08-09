@@ -66,6 +66,9 @@ export class ActionEngine {
       case 'image_save':
         return this.saveImage(context);
 
+      case 'image_find_similar':
+        return this.imageFindSimilar(context);
+
       case 'analyze_table':
         return this.analyzeTable(context);
 
@@ -153,6 +156,10 @@ export class ActionEngine {
     const translations: Record<string, { en: string; detected: string }> = {
       "La vie est belle, pleine de défis mais aussi de moments extraordinaires.": {
         en: "Life is beautiful, full of challenges but also extraordinary moments.",
+        detected: "French"
+      },
+      "La technologie moderne doit simplifier la vie humaine et inspirer la créativité.": {
+        en: "Modern technology must simplify human life and inspire creativity.",
         detected: "French"
       },
       "El camino del éxito requiere esfuerzo constante, paciencia y una visión clara.": {
@@ -552,6 +559,47 @@ console.log('Final Calculated Price:', \`$\${calculatePrice(249, 0.15).toFixed(2
               <span style="font-weight: 600; color: var(--color-cyan);">4.9</span>
             </div>
           </div>
+        </div>
+      `
+    };
+  }
+
+  private static imageFindSimilar(context: ContextElement): ActionResult {
+    const assetName = context.content || 'luxury watch';
+    return {
+      success: true,
+      displayHtml: `
+        <div style="display: flex; flex-direction: column; gap: 12px; max-width: 320px;">
+          <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--color-cyan); font-weight: 700; letter-spacing: 0.5px; margin-bottom: 2px;">🛒 Visual Commerce Matches</div>
+          <div style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 4px;">Found similar matches for "<strong>${assetName}</strong>":</div>
+          
+          <div style="display: flex; gap: 12px; overflow-x: auto; padding-bottom: 6px;">
+            <div style="background: rgba(0,0,0,0.02); border: 1px solid var(--glass-border); padding: 8px; border-radius: 8px; flex: 0 0 100px; text-align: center;">
+              <div style="height: 60px; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.01); border-radius: 4px; overflow: hidden; margin-bottom: 6px;">
+                <img src="/heritage_watch.jpg" alt="heritage" style="max-height: 90%; max-width: 90%; object-fit: contain;" />
+              </div>
+              <div style="font-size: 0.7rem; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Chrono A1</div>
+              <div style="font-size: 0.75rem; color: var(--color-cyan); font-weight: 700; margin-top: 2px;">$249</div>
+            </div>
+            
+            <div style="background: rgba(0,0,0,0.02); border: 1px solid var(--glass-border); padding: 8px; border-radius: 8px; flex: 0 0 100px; text-align: center;">
+              <div style="height: 60px; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.01); border-radius: 4px; overflow: hidden; margin-bottom: 6px;">
+                <img src="/heritage_watch.jpg" alt="heritage" style="max-height: 90%; max-width: 90%; object-fit: contain; filter: hue-rotate(90deg);" />
+              </div>
+              <div style="font-size: 0.7rem; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Classic Azure</div>
+              <div style="font-size: 0.75rem; color: var(--color-cyan); font-weight: 700; margin-top: 2px;">$289</div>
+            </div>
+            
+            <div style="background: rgba(0,0,0,0.02); border: 1px solid var(--glass-border); padding: 8px; border-radius: 8px; flex: 0 0 100px; text-align: center;">
+              <div style="height: 60px; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.01); border-radius: 4px; overflow: hidden; margin-bottom: 6px;">
+                <img src="/heritage_watch.jpg" alt="heritage" style="max-height: 90%; max-width: 90%; object-fit: contain; filter: saturate(0.2);" />
+              </div>
+              <div style="font-size: 0.7rem; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Monochrome</div>
+              <div style="font-size: 0.75rem; color: var(--color-cyan); font-weight: 700; margin-top: 2px;">$310</div>
+            </div>
+          </div>
+          
+          <button id="te-copy-btn" class="composer-btn-sm" style="font-size: 0.75rem; width: 100%; margin-top: 4px; padding: 6px 10px;">Compare Prices & Specs</button>
         </div>
       `
     };

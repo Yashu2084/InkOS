@@ -82,6 +82,15 @@ export class IntentEngine {
           gesture: gType,
           context: cType
         });
+        intents.push({
+          id: 'copy_text',
+          label: '📋 Copy',
+          description: 'Copy formula to clipboard',
+          score: 0.70,
+          icon: '📋',
+          gesture: gType,
+          context: cType
+        });
       }
     }
 
@@ -100,7 +109,7 @@ export class IntentEngine {
         intents.push({
           id: 'translate',
           label: '🌍 Translate',
-          description: 'Translate foreign text to English',
+          description: 'Translate foreign text in context',
           score: 0.90,
           icon: '🌍',
           gesture: gType,
@@ -119,8 +128,17 @@ export class IntentEngine {
           id: 'copy_text',
           label: '📋 Copy',
           description: 'Copy text to clipboard',
-          score: 0.70,
+          score: 0.75,
           icon: '📋',
+          gesture: gType,
+          context: cType
+        });
+        intents.push({
+          id: 'rewrite',
+          label: '✏ Rewrite',
+          description: 'Refactor paragraph phrasing',
+          score: 0.70,
+          icon: '✏',
           gesture: gType,
           context: cType
         });
@@ -159,11 +177,11 @@ export class IntentEngine {
           context: cType
         });
         intents.push({
-          id: 'image_save',
-          label: '🖼 Save',
-          description: 'Download image asset locally',
+          id: 'image_describe',
+          label: '✨ Describe',
+          description: 'AI description of image contents',
           score: 0.90,
-          icon: '🖼',
+          icon: '✨',
           gesture: gType,
           context: cType
         });
@@ -177,11 +195,20 @@ export class IntentEngine {
           context: cType
         });
         intents.push({
-          id: 'image_describe',
-          label: '✨ Describe',
-          description: 'AI description of image contents',
+          id: 'image_save',
+          label: '🖼 Save',
+          description: 'Download image asset locally',
           score: 0.80,
-          icon: '✨',
+          icon: '🖼',
+          gesture: gType,
+          context: cType
+        });
+        intents.push({
+          id: 'image_find_similar',
+          label: '🛒 Find Similar',
+          description: 'Shop visual duplicates',
+          score: 0.75,
+          icon: '🛒',
           gesture: gType,
           context: cType
         });
@@ -235,9 +262,18 @@ export class IntentEngine {
       if (gType === 'circle' || gType === 'lasso' || gType === 'rectangle') {
         intents.push({
           id: 'analyze_table',
-          label: '📈 Analyze',
+          label: '📊 Analyze',
           description: 'Statistical summary averages',
           score: 0.95,
+          icon: '📊',
+          gesture: gType,
+          context: cType
+        });
+        intents.push({
+          id: 'table_visualize',
+          label: '📈 Visualize',
+          description: 'Plot table data in virtual aggregates',
+          score: 0.90,
           icon: '📈',
           gesture: gType,
           context: cType
@@ -246,17 +282,8 @@ export class IntentEngine {
           id: 'table_export',
           label: '📤 Export',
           description: 'Convert table to CSV format',
-          score: 0.90,
+          score: 0.85,
           icon: '📤',
-          gesture: gType,
-          context: cType
-        });
-        intents.push({
-          id: 'table_visualize',
-          label: '📊 Visualize',
-          description: 'Plot table data in virtual aggregates',
-          score: 0.80,
-          icon: '📊',
           gesture: gType,
           context: cType
         });

@@ -16,7 +16,8 @@ export class ActionMenu {
   public show(
     intents: Intent[],
     position: { x: number; y: number },
-    onSelect: (intent: Intent) => void
+    onSelect: (intent: Intent) => void,
+    targetBounds?: { x: number; y: number; width: number; height: number }
   ): void {
     this.hide();
     this.hideResult();
@@ -64,14 +65,61 @@ export class ActionMenu {
     this.container.appendChild(menu);
     this.menuElement = menu;
 
-    // Adjust position so menu doesn't overflow container bounds
-    this.adjustElementPosition(menu, position);
+    // Adjust position so menu doesn't overflow container bounds or cover the element
+    this.adjustElementPosition(menu, position, targetBounds);
+
+    // Bind Keyboard focus navigation
+    const buttons = Array.from(menu.querySelectorAll('.pill-item-btn')) as HTMLButtonElement[];
+    if (buttons.length > 0) {
+      let activeIndex = 0;
+      
+      // Highlight the cyan-active button initially if present
+      const cyanActiveIdx = buttons.findIndex(btn => btn.classList.contains('cyan-active'));
+      if (cyanActiveIdx !== -1) {
+        activeIndex = cyanActiveIdx;
+      }
+      
+      // Short delay focusing to prevent Enter key repeating from activation shortcut
+      setTimeout(() => {
+        if (buttons[activeIndex]) {
+          buttons[activeIndex].focus();
+        }
+      }, 50);
+
+      const handleKeyDown = (e: KeyboardEvent) => {
+        if (e.key === 'ArrowDown' || (e.key === 'Tab' && !e.shiftKey)) {
+          e.preventDefault();
+          activeIndex = (activeIndex + 1) % buttons.length;
+          buttons[activeIndex].focus();
+        } else if (e.key === 'ArrowUp' || (e.key === 'Tab' && e.shiftKey)) {
+          e.preventDefault();
+          activeIndex = (activeIndex - 1 + buttons.length) % buttons.length;
+          buttons[activeIndex].focus();
+        } else if (e.key === 'Escape') {
+          e.preventDefault();
+          this.hide();
+          window.dispatchEvent(new CustomEvent('inkos-cancel'));
+        }
+      };
+
+      menu.addEventListener('keydown', handleKeyDown);
+    }
   }
 
   public hide(): void {
     if (this.menuElement) {
-      this.menuElement.remove();
-      this.menuElement = null;
+      const el = this.menuElement;
+      this.menuElement = null; // Detach reference immediately
+      
+      el.classList.add('fade-out');
+      el.addEventListener('animationend', () => {
+        el.remove();
+      }, { once: true });
+      
+      // Fallback
+      setTimeout(() => {
+        if (el.parentNode) el.remove();
+      }, 250);
     }
   }
 
@@ -125,7 +173,6 @@ export class ActionMenu {
     
     await new Promise(resolve => setTimeout(resolve, 80));
   }
-
 
   /**
    * Shows action output overlay.
@@ -196,29 +243,52 @@ export class ActionMenu {
   /**
    * Calculates positioning within container boundaries.
    */
-  private adjustElementPosition(el: HTMLElement, pos: { x: number; y: number }): void {
+  private adjustElementPosition(
+    el: HTMLElement, 
+    pos: { x: number; y: number },
+    targetBounds?: { x: number; y: number; width: number; height: number }
+  ): void {
     const parentRect = this.container.getBoundingClientRect();
     const elWidth = el.offsetWidth || 250;
     const elHeight = el.offsetHeight || 180;
 
-    let left = pos.x + 10;
-    let top = pos.y + 10;
+    let left = pos.x;
+    let top = pos.y;
 
-    // Check right boundary overflow
-    if (left + elWidth > parentRect.width) {
-      left = pos.x - elWidth - 10;
-    }
-    if (left < 0) {
-      left = 10;
+    if (targetBounds) {
+      // Place to the right of the target bounding box with a 12px offset
+      left = targetBounds.x + targetBounds.width + 12;
+      top = targetBounds.y;
+
+      // Check right overflow: if placing on right overflows, place on left of target
+      if (left + elWidth > parentRect.width) {
+        left = targetBounds.x - elWidth - 12;
+      }
+      // If left also overflows or is negative, place below the target
+      if (left < 0) {
+        left = targetBounds.x + (targetBounds.width - elWidth) / 2;
+        top = targetBounds.y + targetBounds.height + 12;
+      }
+      // If bottom overflows, place above the target
+      if (top + elHeight > parentRect.height) {
+        top = targetBounds.y - elHeight - 12;
+      }
+    } else {
+      left = pos.x + 10;
+      top = pos.y + 10;
+      
+      if (left + elWidth > parentRect.width) {
+        left = pos.x - elWidth - 10;
+      }
+      if (top + elHeight > parentRect.height) {
+        top = pos.y - elHeight - 10;
+      }
     }
 
-    // Check bottom boundary overflow
-    if (top + elHeight > parentRect.height) {
-      top = pos.y - elHeight - 10;
-    }
-    if (top < 0) {
-      top = 10;
-    }
+    // Guard coordinates inside screen boundaries with a 12px safety padding
+    const padding = 12;
+    left = Math.max(padding, Math.min(parentRect.width - elWidth - padding, left));
+    top = Math.max(padding, Math.min(parentRect.height - elHeight - padding, top));
 
     el.style.left = `${left}px`;
     el.style.top = `${top}px`;
