@@ -84,49 +84,157 @@ function removeElementHighlight() {
   }
 }
 
-function toggleInkOverlay(active?: boolean): void {
-  const nextState = active !== undefined ? active : !isOverlayActive;
-  if (nextState === isOverlayActive) return;
-  isOverlayActive = nextState;
+type InkOSState = 
+  | 'IDLE'
+  | 'ACTIVATING'
+  | 'DRAWING'
+  | 'PROCESSING_SELECTION'
+  | 'ACTION_MENU'
+  | 'EXECUTING_ACTION'
+  | 'SHOWING_RESULT';
 
-  if (isOverlayActive) {
-    // Dim the screen and blur
-    dimmedOverlay.classList.add('dimmed');
-    canvasElement.style.pointerEvents = 'auto';
-    canvasElement.style.opacity = '1';
-    
-    // Hide previous results when starting a new session
-    actionMenu.hideResult();
-    removeElementHighlight();
-    
-    // Play warm ripple sound on overlay activation
-    AudioSynth.playRipple();
-    inspector.addLog('system', 'InkOS Intent overlay activated. Cursor locked into digital glass canvas.');
-    
-    if (controlCenter) {
-      controlCenter.setOrbState('listening');
+let currentState: InkOSState = 'IDLE';
+
+function transitionToState(nextState: InkOSState): void {
+  const prevState = currentState;
+  currentState = nextState;
+  
+  inspector.addLog('system', `State transition: ${prevState} ➔ ${nextState}`);
+
+  const cursor = document.getElementById('ink-pointer');
+
+  switch (nextState) {
+    case 'IDLE':
+      isOverlayActive = false;
+      dimmedOverlay.classList.remove('dimmed');
+      dimmedOverlay.style.pointerEvents = 'none';
+      canvasElement.style.pointerEvents = 'none';
+      canvasElement.style.opacity = '0';
+      
+      canvasOverlay.clearCanvas();
+      actionMenu.hide();
+      removeElementHighlight();
+      
+      if (cursor) cursor.style.display = 'none';
+      if (controlCenter) controlCenter.setOrbState('idle');
+      break;
+
+    case 'ACTIVATING':
+      isOverlayActive = true;
+      dimmedOverlay.classList.add('dimmed');
+      dimmedOverlay.style.pointerEvents = 'auto';
+      canvasElement.style.pointerEvents = 'auto';
+      canvasElement.style.opacity = '1';
+      
+      actionMenu.hideResult();
+      actionMenu.hide();
+      removeElementHighlight();
+      
+      if (cursor) {
+        cursor.style.display = 'block';
+      }
+      if (controlCenter) controlCenter.setOrbState('listening');
+      break;
+
+    case 'DRAWING':
+      isOverlayActive = true;
+      dimmedOverlay.classList.add('dimmed');
+      dimmedOverlay.style.pointerEvents = 'auto';
+      canvasElement.style.pointerEvents = 'auto';
+      canvasElement.style.opacity = '1';
+      if (cursor) cursor.style.display = 'block';
+      if (controlCenter) controlCenter.setOrbState('listening');
+      break;
+
+    case 'PROCESSING_SELECTION':
+      dimmedOverlay.style.pointerEvents = 'none';
+      canvasElement.style.pointerEvents = 'none';
+      if (cursor) cursor.style.display = 'none';
+      if (controlCenter) controlCenter.setOrbState('thinking');
+      break;
+
+    case 'ACTION_MENU':
+      dimmedOverlay.style.pointerEvents = 'none';
+      canvasElement.style.pointerEvents = 'none';
+      if (cursor) cursor.style.display = 'none';
+      if (controlCenter) controlCenter.setOrbState('listening');
+      break;
+
+    case 'EXECUTING_ACTION':
+      dimmedOverlay.style.pointerEvents = 'none';
+      canvasElement.style.pointerEvents = 'none';
+      if (cursor) cursor.style.display = 'none';
+      if (controlCenter) controlCenter.setOrbState('executing');
+      break;
+
+    case 'SHOWING_RESULT':
+      isOverlayActive = false;
+      dimmedOverlay.classList.remove('dimmed');
+      dimmedOverlay.style.pointerEvents = 'none';
+      canvasElement.style.pointerEvents = 'none';
+      if (cursor) cursor.style.display = 'none';
+      break;
+  }
+}
+
+function toggleInkOverlay(active?: boolean): void {
+  const nextActive = active !== undefined ? active : (currentState === 'IDLE');
+  if (nextActive) {
+    if (currentState === 'IDLE') {
+      AudioSynth.playRipple();
+      transitionToState('ACTIVATING');
     }
   } else {
-    // Reset overlay
-    dimmedOverlay.classList.remove('dimmed');
-    canvasElement.style.pointerEvents = 'none';
-    
-    // Clear drawings, menus, and cursors
-    canvasOverlay.clearCanvas();
-    actionMenu.hide();
-    
-    const cursor = document.getElementById('ink-pointer');
-    if (cursor) cursor.style.display = 'none';
-    
-    // Play click sound on deactivate
-    AudioSynth.playClick();
-    inspector.addLog('system', 'Overlay deactivated. Returning focus to operating system.');
-    
-    if (controlCenter) {
-      controlCenter.setOrbState('idle');
+    if (currentState !== 'IDLE') {
+      AudioSynth.playClick();
+      transitionToState('IDLE');
     }
   }
 }
+
+// Transition from ACTIVATING to DRAWING on canvas interaction
+canvasElement.addEventListener('pointerdown', () => {
+  if (currentState === 'ACTIVATING') {
+    transitionToState('DRAWING');
+  }
+});
+
+// Click outside listener (Intercepts cancels in capture phase)
+window.addEventListener('pointerdown', (e) => {
+  const target = e.target as HTMLElement;
+  
+  if (currentState === 'ACTION_MENU') {
+    const menuEl = document.querySelector('.vision-action-pill');
+    const clickedOrb = orbEl && orbEl.contains(target);
+    if (menuEl && !menuEl.contains(target) && !clickedOrb) {
+      e.stopPropagation();
+      e.preventDefault();
+      AudioSynth.playClick();
+      transitionToState('IDLE');
+    }
+  } else if (currentState === 'SHOWING_RESULT') {
+    const resultEl = document.querySelector('.glass-result-overlay');
+    const clickedOrb = orbEl && orbEl.contains(target);
+    if (resultEl && !resultEl.contains(target) && !clickedOrb) {
+      e.stopPropagation();
+      e.preventDefault();
+      AudioSynth.playClick();
+      transitionToState('IDLE');
+    }
+  }
+}, true);
+
+// Bind Escape key cancellation
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    if (currentState !== 'IDLE') {
+      e.preventDefault();
+      e.stopPropagation();
+      AudioSynth.playClick();
+      transitionToState('IDLE');
+    }
+  }
+});
 
 // Bind Global Shortcut (Ctrl + Space)
 window.addEventListener('keydown', (e) => {
@@ -301,11 +409,7 @@ async function handleGestureComplete(points: Point[]): Promise<void> {
   // If drawing is empty/unknown, clear and exit
   if (gesture.type === 'unknown' && context.type === 'empty') {
     inspector.addLog('system', 'Drawing unrecognized. Clearing canvas overlay.');
-    actionMenu.hide();
-    actionMenu.hideResult();
-    removeElementHighlight();
-    inspector.clearInspector();
-    if (controlCenter) controlCenter.setOrbState('idle');
+    transitionToState('IDLE');
     return;
   }
 
@@ -357,7 +461,7 @@ async function handleGestureComplete(points: Point[]): Promise<void> {
 
   // 5. Execute action routine
   const executeIntent = async (selectedIntent: Intent, executePosPage: { x: number; y: number }) => {
-    if (controlCenter) controlCenter.setOrbState('thinking');
+    transitionToState('EXECUTING_ACTION');
     
     // Sequential progress status steps
     await actionMenu.showLoading(executePosPage, [
@@ -366,8 +470,6 @@ async function handleGestureComplete(points: Point[]): Promise<void> {
       'Analyzing Content...',
       'Executing Action...'
     ]);
-
-    if (controlCenter) controlCenter.setOrbState('executing');
 
     let result: ActionResult;
     try {
@@ -394,9 +496,6 @@ async function handleGestureComplete(points: Point[]): Promise<void> {
         }
       }
 
-      // Close drawing overlay first, returning user to work!
-      toggleInkOverlay(false);
-
       if (result.success && result.displayHtml) {
         // Play action success pop sound
         AudioSynth.playClick();
@@ -412,33 +511,30 @@ async function handleGestureComplete(points: Point[]): Promise<void> {
           };
         }
 
+        transitionToState('SHOWING_RESULT');
         actionMenu.showResult(result.displayHtml, resultPosPage, () => {
-          removeElementHighlight();
-          inspector.clearInspector();
+          transitionToState('IDLE');
         });
-      } else if (!result.success) {
-        AudioSynth.playTone(); // Play warning audio tone
-        alert(`Failed to execute action: ${result.message}`);
-        actionMenu.hide();
-        removeElementHighlight();
       } else {
-        // Copied text / silent actions
-        AudioSynth.playClick();
-        actionMenu.hide();
-        removeElementHighlight();
-        inspector.clearInspector();
+        if (!result.success) {
+          AudioSynth.playTone(); // Play warning audio tone
+          alert(`Failed to execute action: ${result.message}`);
+        } else {
+          // Copied text / silent actions
+          AudioSynth.playClick();
+        }
+        transitionToState('IDLE');
       }
     } catch (e: any) {
       AudioSynth.playTone();
       logActivityEntry(gesture.type, context.type, selectedIntent.label, points, false);
-      if (controlCenter) controlCenter.setOrbState('idle');
       inspector.addLog('system', `🚨 SDK Engine Error: ${e.message || e}`);
-      actionMenu.hide();
-      removeElementHighlight();
+      transitionToState('IDLE');
     }
   };
 
   // Trigger coordinate morphing towards the Action Pill center coordinates
+  transitionToState('PROCESSING_SELECTION');
   canvasOverlay.animateMorph(pillX, pillY, async () => {
     // Check config default execution mode
     const modeSelect = document.getElementById('mode-select') as HTMLSelectElement;
@@ -456,6 +552,7 @@ async function handleGestureComplete(points: Point[]): Promise<void> {
       await executeIntent(intents[0], pillPosPage);
     } else {
       // Show Vision Pro pill selection menu
+      transitionToState('ACTION_MENU');
       actionMenu.show(intents, pillPosPage, async (intent) => {
         await executeIntent(intent, pillPosPage);
       }, targetBoundsPage);
