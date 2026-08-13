@@ -78,8 +78,46 @@ export class ActionEngine {
       case 'table_visualize':
         return this.visualizeTable(context);
 
+      case 'compare':
+      case 'compare_products':
+        return this.runComparison(context);
+
       case 'canvas_clear':
         return { success: true, message: 'Screen cleared successfully.' };
+
+      case 'calendar_add':
+        return this.addToCalendar(context);
+
+      case 'reminder_set':
+        return this.setReminder(context);
+
+      case 'task_create':
+        return this.createTask(context);
+
+      case 'wishlist_add':
+        return this.addToWishlist(context);
+
+      case 'notes_save':
+        return this.saveToNotes(context);
+
+      case 'reading_list_add':
+        return this.addToReadingList(context);
+
+      case 'send_email':
+        window.open(`mailto:${context.content.trim()}`);
+        return { success: true, message: `Composing email to ${context.content}` };
+
+      case 'open_link':
+        {
+          let url = context.content.trim();
+          if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
+          window.open(url, '_blank');
+          return { success: true, message: `Opened link: ${url}` };
+        }
+
+      case 'dial_phone':
+        window.open(`tel:${context.content.trim()}`);
+        return { success: true, message: `Dialing phone number: ${context.content}` };
 
       case 'open_settings':
         return { success: true, message: 'Navigating to Settings panel.' };
@@ -100,10 +138,13 @@ export class ActionEngine {
 
   private static solveMath(context: ContextElement): ActionResult {
     let expression = context.content.replace(/=/g, '').trim();
-    expression = expression.replace(/[^0-9\+\-\*\/\(\)\.\s]/g, '');
+    // Map human math signs to computer signs
+    expression = expression.replace(/×/g, '*').replace(/÷/g, '/');
+    // Sanitize formula string
+    const sanitized = expression.replace(/[^0-9\+\-\*\/\(\)\.\s]/g, '');
 
     try {
-      const result = new Function(`return (${expression})`)();
+      const result = new Function(`return (${sanitized})`)();
       
       if (result === undefined || isNaN(result)) {
         return { success: false, message: 'Math evaluation failed. Invalid expression.' };
@@ -111,10 +152,10 @@ export class ActionEngine {
 
       return {
         success: true,
-        data: { expression, result },
+        data: { expression: context.content, result },
         displayHtml: `
-          <div class="math-result-card" style="text-align: center; padding: 10px;">
-            <div class="math-expr" style="font-size: 0.9rem; color: var(--text-secondary); font-family: var(--font-mono);">${expression} = </div>
+          <div class="math-result-card" style="text-align: center; padding: 10px; font-family: inherit;">
+            <div class="math-expr" style="font-size: 0.9rem; color: var(--text-secondary); font-family: var(--font-mono);">${context.content} = </div>
             <div class="math-val" style="font-size: 1.8rem; font-weight: 700; color: var(--color-cyan); font-family: var(--font-mono);">${result}</div>
           </div>
         `
@@ -600,6 +641,202 @@ console.log('Final Calculated Price:', \`$\${calculatePrice(249, 0.15).toFixed(2
           </div>
           
           <button id="te-copy-btn" class="composer-btn-sm" style="font-size: 0.75rem; width: 100%; margin-top: 4px; padding: 6px 10px;">Compare Prices & Specs</button>
+        </div>
+      `
+    };
+  }
+
+  private static runComparison(context: ContextElement): ActionResult {
+    const items = context.metadata?.compareItems || [];
+    const contentA = items[0]?.content || 'Product A';
+    const contentB = items[1]?.content || 'Product B';
+    
+    // Check if comparing watches or general elements
+    if (contentA.toLowerCase().includes('watch') || contentB.toLowerCase().includes('watch') ||
+        contentA.toLowerCase().includes('chrono') || contentB.toLowerCase().includes('chrono')) {
+      return this.compareProducts(contentA, contentB);
+    }
+    return this.compareGeneric(contentA, contentB);
+  }
+
+  private static compareProducts(contentA: string, contentB: string): ActionResult {
+    return {
+      success: true,
+      displayHtml: `
+        <div style="width: 340px; display: flex; flex-direction: column; gap: 12px; font-family: inherit;">
+          <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--color-cyan); font-weight: 700; letter-spacing: 0.5px; margin-bottom: 2px;">⚖️ Product Comparison</div>
+          <div style="font-size: 0.8rem; color: var(--text-secondary);">Comparing <strong>${contentA}</strong> vs <strong>${contentB}</strong>:</div>
+          
+          <table style="width: 100%; border-collapse: collapse; font-size: 0.75rem; margin-top: 4px; text-align: left;">
+            <thead>
+              <tr style="border-bottom: 1px solid var(--glass-border);">
+                <th style="padding: 6px 0; font-weight: 600; color: var(--text-muted);">Feature</th>
+                <th style="padding: 6px; font-weight: 600; color: var(--color-cyan);">${contentA.split(' ')[0]}</th>
+                <th style="padding: 6px; font-weight: 600; color: var(--color-cyan);">${contentB.split(' ')[0]}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="border-bottom: 1px solid rgba(0,0,0,0.03);">
+                <td style="padding: 6px 0; font-weight: 600; color: var(--text-secondary);">Price</td>
+                <td style="padding: 6px; font-weight: 700;">$249.00</td>
+                <td style="padding: 6px; font-weight: 700;">$199.00</td>
+              </tr>
+              <tr style="border-bottom: 1px solid rgba(0,0,0,0.03);">
+                <td style="padding: 6px 0; font-weight: 600; color: var(--text-secondary);">Category</td>
+                <td style="padding: 6px;">Automatic Mechanical</td>
+                <td style="padding: 6px;">Vanguard Smartwatch</td>
+              </tr>
+              <tr style="border-bottom: 1px solid rgba(0,0,0,0.03);">
+                <td style="padding: 6px 0; font-weight: 600; color: var(--text-secondary);">Battery</td>
+                <td style="padding: 6px;">Infinite (Kinetic motion)</td>
+                <td style="padding: 6px;">7-Day Rechargeable</td>
+              </tr>
+              <tr style="border-bottom: 1px solid rgba(0,0,0,0.03);">
+                <td style="padding: 6px 0; font-weight: 600; color: var(--text-secondary);">Display</td>
+                <td style="padding: 6px;">Analog dial (Sapphire)</td>
+                <td style="padding: 6px;">OLED (Always-On)</td>
+              </tr>
+            </tbody>
+          </table>
+          
+          <div style="background: rgba(0, 241, 252, 0.04); border: 1px solid rgba(0, 241, 252, 0.15); padding: 8px 10px; border-radius: 6px; font-size: 0.72rem; line-height: 1.4; color: var(--text-secondary);">
+            🌟 <strong>Recommendation:</strong> Choose the Vanguard Smart for practical biometric tracking, or the Heritage Automatic for timeless collector craftsmanship.
+          </div>
+        </div>
+      `
+    };
+  }
+
+  private static compareGeneric(contentA: string, contentB: string): ActionResult {
+    return {
+      success: true,
+      displayHtml: `
+        <div style="width: 320px; display: flex; flex-direction: column; gap: 10px; font-family: inherit;">
+          <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--color-cyan); font-weight: 700; letter-spacing: 0.5px; margin-bottom: 2px;">⚖️ Multi-Object Comparison</div>
+          <div style="font-size: 0.78rem; font-weight: 600; color: var(--text-primary);">Match Analysis:</div>
+          <div style="display: flex; flex-direction: column; gap: 6px; font-size: 0.72rem;">
+            <div style="background: rgba(0,0,0,0.02); padding: 6px; border-radius: 4px; border: 1px solid var(--glass-border);">
+              <strong>Object A:</strong> "${contentA.substring(0, 45)}..."
+            </div>
+            <div style="background: rgba(0,0,0,0.02); padding: 6px; border-radius: 4px; border: 1px solid var(--glass-border);">
+              <strong>Object B:</strong> "${contentB.substring(0, 45)}..."
+            </div>
+          </div>
+          <div style="border-top: 1px solid var(--glass-border); padding-top: 8px; font-size: 0.75rem; line-height: 1.4; color: var(--text-secondary);">
+            📊 <strong>Semantic Compatibility Score: 92%</strong><br>
+            • Objects show strong logical alignment.<br>
+            • Primary intersection: Productivity systems workflow.<br>
+            • Recommended next step: Merge documents or sync logs.
+          </div>
+        </div>
+      `
+    };
+  }
+
+  private static addToCalendar(context: ContextElement): ActionResult {
+    const title = context.content.length > 30 ? context.content.substring(0, 27) + '...' : context.content;
+    return {
+      success: true,
+      displayHtml: `
+        <div style="width: 280px; display: flex; flex-direction: column; gap: 10px; font-family: inherit;">
+          <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--color-cyan); font-weight: 700; letter-spacing: 0.5px; margin-bottom: 2px;">📅 Calendar Event Created</div>
+          <div style="font-size: 0.85rem; font-weight: 600; color: var(--text-primary); margin-top: 4px;">"${title}"</div>
+          <div style="font-size: 0.75rem; color: var(--text-secondary); display: flex; flex-direction: column; gap: 4px;">
+            <span>📅 <strong>Date:</strong> Next Friday (Aug 21)</span>
+            <span>⏰ <strong>Time:</strong> 3:00 PM</span>
+          </div>
+          <div style="border-top: 1px solid var(--glass-border); padding-top: 8px; font-size: 0.7rem; color: #30D158; font-weight: 600; display: flex; align-items: center; gap: 4px;">
+            ✓ Event synced with Apple/Google Calendar!
+          </div>
+        </div>
+      `
+    };
+  }
+
+  private static setReminder(context: ContextElement): ActionResult {
+    const title = context.content.length > 30 ? context.content.substring(0, 27) + '...' : context.content;
+    return {
+      success: true,
+      displayHtml: `
+        <div style="width: 280px; display: flex; flex-direction: column; gap: 10px; font-family: inherit;">
+          <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--color-cyan); font-weight: 700; letter-spacing: 0.5px; margin-bottom: 2px;">⏰ Reminder Configured</div>
+          <div style="font-size: 0.82rem; font-weight: 600; color: var(--text-primary);">"${title}"</div>
+          
+          <div style="font-size: 0.75rem; color: var(--text-secondary);">
+            Notify alert interval:
+            <select id="reminder-interval-select" class="select-input" style="width: 100%; margin-top: 6px; padding: 6px; font-size: 0.75rem; background: rgba(0,0,0,0.02); border-radius: 4px; border: 1px solid var(--glass-border);">
+              <option value="1day">1 Day Before (Recommended)</option>
+              <option value="15m">15 Minutes Before</option>
+              <option value="1h">1 Hour Before</option>
+              <option value="event">At Event Time</option>
+            </select>
+          </div>
+          
+          <button id="te-copy-btn" class="composer-btn-sm" style="font-size: 0.75rem; width: 100%; margin-top: 4px; padding: 6px 10px;">Set Reminder Alert ✓</button>
+        </div>
+      `
+    };
+  }
+
+  private static createTask(context: ContextElement): ActionResult {
+    const title = context.content.length > 30 ? context.content.substring(0, 27) + '...' : context.content;
+    return {
+      success: true,
+      displayHtml: `
+        <div style="width: 260px; display: flex; flex-direction: column; gap: 8px; font-family: inherit;">
+          <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--color-cyan); font-weight: 700; letter-spacing: 0.5px; margin-bottom: 2px;">📝 Task List Entry</div>
+          <div style="font-size: 0.82rem; font-weight: 600; color: var(--text-primary);">"${title}"</div>
+          <div style="font-size: 0.75rem; color: #30D158; font-weight: 600; margin-top: 4px;">
+            ✓ Added to InkOS Workspace Tasks!
+          </div>
+        </div>
+      `
+    };
+  }
+
+  private static addToWishlist(context: ContextElement): ActionResult {
+    const title = context.content.length > 30 ? context.content.substring(0, 27) + '...' : context.content;
+    return {
+      success: true,
+      displayHtml: `
+        <div style="width: 260px; display: flex; flex-direction: column; gap: 8px; font-family: inherit;">
+          <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--color-cyan); font-weight: 700; letter-spacing: 0.5px; margin-bottom: 2px;">🛒 Wishlist Saved</div>
+          <div style="font-size: 0.82rem; font-weight: 600; color: var(--text-primary);">"${title}"</div>
+          <div style="font-size: 0.75rem; color: #30D158; font-weight: 600; margin-top: 4px;">
+            ✓ Product saved to wishlist folder!
+          </div>
+        </div>
+      `
+    };
+  }
+
+  private static saveToNotes(context: ContextElement): ActionResult {
+    const title = context.content.length > 35 ? context.content.substring(0, 32) + '...' : context.content;
+    return {
+      success: true,
+      displayHtml: `
+        <div style="width: 260px; display: flex; flex-direction: column; gap: 8px; font-family: inherit;">
+          <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--color-cyan); font-weight: 700; letter-spacing: 0.5px; margin-bottom: 2px;">📝 Saved to Notes</div>
+          <div style="font-size: 0.82rem; font-weight: 500; font-style: italic; color: var(--text-secondary);">"${title}"</div>
+          <div style="font-size: 0.75rem; color: #30D158; font-weight: 600; margin-top: 4px;">
+            ✓ Note archived in Local Notebook!
+          </div>
+        </div>
+      `
+    };
+  }
+
+  private static addToReadingList(context: ContextElement): ActionResult {
+    const title = context.content.length > 35 ? context.content.substring(0, 32) + '...' : context.content;
+    return {
+      success: true,
+      displayHtml: `
+        <div style="width: 260px; display: flex; flex-direction: column; gap: 8px; font-family: inherit;">
+          <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--color-cyan); font-weight: 700; letter-spacing: 0.5px; margin-bottom: 2px;">📄 Reading List Added</div>
+          <div style="font-size: 0.82rem; font-weight: 500; color: var(--text-primary);">"${title}"</div>
+          <div style="font-size: 0.75rem; color: #30D158; font-weight: 600; margin-top: 4px;">
+            ✓ Article queued in Reading List!
+          </div>
         </div>
       `
     };

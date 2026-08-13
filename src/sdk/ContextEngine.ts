@@ -26,7 +26,7 @@ export class ContextEngine {
     }
 
     if (bestTarget && highestOverlapScore > 0.05) {
-      const type = (bestTarget.getAttribute('data-inkos-type') || 'text') as ContextType;
+      let type = (bestTarget.getAttribute('data-inkos-type') || 'text') as ContextType;
       const content = bestTarget.getAttribute('data-inkos-content') || bestTarget.innerText || '';
       
       const targetRect = bestTarget.getBoundingClientRect();
@@ -40,6 +40,49 @@ export class ContextEngine {
         }
       } catch (e) {
         console.error('Failed to parse metadata for element', e);
+      }
+
+      // Semantic content type detection and context inference
+      if (type === 'text') {
+        const textContent = content.trim();
+        
+        // 1. Math Equation check
+        const cleanText = textContent.replace(/\s+/g, '');
+        const hasNumbers = /[\d]/.test(cleanText);
+        const hasOperators = /[\+\-\*\/×÷]/.test(cleanText);
+        const isMathChars = /^[\d\s+\-*/×÷()=.]+$/.test(cleanText);
+        if (isMathChars && hasNumbers && hasOperators) {
+          type = 'equation';
+        }
+        // 2. Email check
+        else if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(textContent)) {
+          type = 'email';
+        }
+        // 3. Link check
+        else if (/^(https?:\/\/)?(www\.)?[a-zA-Z0-9-]+\.[a-zA-Z]{2,}(\/\S*)?$/.test(textContent)) {
+          type = 'link';
+        }
+        // 4. Phone check
+        else if (/^\+?[\d\s\-()]{7,15}$/.test(textContent) && /[\d]/.test(textContent)) {
+          type = 'phone';
+        }
+        // 5. Date/Time/Event check
+        else {
+          const dateRegex = /(monday|tuesday|wednesday|thursday|friday|saturday|sunday|today|tomorrow|january|february|march|april|may|june|july|august|september|october|november|december|\d{1,2}\s+(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)|\d{1,2}\/\d{1,2})/i;
+          const timeRegex = /(\d{1,2}(:\d{2})?\s*(pm|am|clock))/i;
+          
+          if (dateRegex.test(textContent) || timeRegex.test(textContent)) {
+            type = 'event';
+            metadata.isEvent = true;
+            metadata.dateMatch = textContent.match(dateRegex)?.[0];
+            metadata.timeMatch = textContent.match(timeRegex)?.[0];
+          }
+        }
+      } else if (type === 'image') {
+        // Product card check
+        if (bestTarget.classList.contains('sim-product-card') || bestTarget.id.includes('prod') || content.toLowerCase().includes('watch')) {
+          type = 'product';
+        }
       }
 
       return {

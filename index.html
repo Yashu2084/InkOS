@@ -4,6 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>InkOS — Every Screen. One Language.</title>
+    <link rel="icon" type="image/png" href="/inkos_logo.png" />
+    <link rel="shortcut icon" type="image/png" href="/inkos_logo.png" />
     <link rel="stylesheet" href="/src/style.css" />
   </head>
   <body>
@@ -18,8 +20,8 @@
 
     <!-- Master Header Navigation -->
     <header class="master-header">
-      <div class="brand">
-        <div class="brand-icon">🖎</div>
+      <div class="brand" style="display: flex; align-items: center; gap: 8px;">
+        <inkos-logo size="28px"></inkos-logo>
         <span>InkOS</span>
       </div>
       
@@ -37,21 +39,231 @@
     </header>
 
     <!-- TAB 1: HOME & HERO LANDING -->
+
     <div id="tab-home" class="tab-content active">
       <!-- Hero Header -->
-      <section class="landing-hero" style="padding-bottom: 30px;">
-        <div class="hero-badge">Intent Through Ink</div>
-        <h1>Every Screen.<br>One Language.</h1>
-        <p>InkOS is a premium overlay interaction layer sitting above all applications. Simply press <strong>Ctrl + Space</strong> to activate a transparent sheet of digital glass, draw naturally over any text, image, code, or table, and watch your computer understand intent instantly.</p>
+      <section class="landing-hero" style="padding-bottom: 24px; position: relative;">
+        <!-- Environmental soft watermark branding background element -->
+        <inkos-logo size="320px" style="position: absolute; top: -80px; left: 50%; transform: translateX(-50%); opacity: 0.035; pointer-events: none; z-index: 0;"></inkos-logo>
         
-        <div class="hero-buttons">
-          <button class="btn-primary" id="hero-get-started">Scroll to Showcase</button>
-          <button class="btn-secondary" id="hero-watch-demo">Play Demo Tones</button>
+        <div style="display: flex; justify-content: center; margin-bottom: 16px; z-index: 1; position: relative;">
+          <inkos-logo size="72px"></inkos-logo>
+        </div>
+        <div class="hero-badge" style="z-index: 1; position: relative;">Intent Through Ink</div>
+        <h1 style="font-size: 3.6rem; font-weight: 800; line-height: 1.1; margin-top: 10px; margin-bottom: 16px; letter-spacing: -2px;">Every Screen.<br>One Language.</h1>
+        <p style="max-width: 720px; font-size: 1.1rem; line-height: 1.6; color: var(--text-secondary); margin-bottom: 32px;">
+          InkOS is a premium digital overlay sitting above all applications. Simply press <strong>Ctrl + Space</strong> to activate a transparent sheet of interactive glass, draw naturally over any text, image, formula, or product, and watch your screen respond instantly.
+        </p>
+        
+        <div class="hero-buttons" style="display: flex; gap: 16px; margin-bottom: 20px;">
+          <button class="btn-primary" id="hero-try-inkos-live" style="background: var(--color-cyan); padding: 14px 28px; font-size: 1rem; border-radius: 30px; font-weight: 600; cursor: pointer; box-shadow: 0 10px 20px var(--color-cyan-glow);">Try InkOS Live 🖎</button>
+          <button class="btn-secondary" id="hero-watch-demo" style="padding: 14px 28px; font-size: 1rem; border-radius: 30px; font-weight: 600; cursor: pointer; border: 1px solid var(--glass-border); background: var(--bg-graphite);">Watch It Work 🎥</button>
         </div>
       </section>
 
-      <!-- Interactive Digital Screen Demo Container (Feature 1) -->
-      <section style="max-width: 1000px; margin: 0 auto 50px; padding: 0 40px;">
+      <!-- Gesture Playground Section -->
+      <section class="gesture-playground-section" style="max-width: 1000px; margin: 40px auto 80px; padding: 0 40px;">
+        <div style="text-align: center; margin-bottom: 32px;">
+          <h2 style="font-size: 2.2rem; font-weight: 800; letter-spacing: -1px; margin-bottom: 12px;">DON'T JUST WATCH IT. DRAW SOMETHING.</h2>
+          <p style="color: var(--text-secondary); font-size: 0.95rem;">Select a gesture card below to watch its drawing path, then draw it yourself inside the simulation canvas.</p>
+        </div>
+
+        <!-- Gesture Grid Cards -->
+        <div class="gesture-playground-grid" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-bottom: 24px;">
+          <div class="playground-gesture-card active" data-gesture="circle" style="background: var(--bg-graphite); border: 2px solid var(--color-cyan); border-radius: var(--radius-normal); padding: 20px 16px; text-align: center; cursor: pointer; transition: all 0.3s ease; position: relative; box-shadow: var(--glass-shadow);">
+            <div class="gesture-anim-svg" style="height: 50px; display: flex; align-items: center; justify-content: center; margin-bottom: 10px;">
+              <svg width="40" height="40" viewBox="0 0 40 40">
+                <circle cx="20" cy="20" r="14" fill="none" stroke="var(--color-cyan)" stroke-width="3" stroke-dasharray="100" stroke-dashoffset="0" class="svg-circle-path"></circle>
+              </svg>
+            </div>
+            <strong style="display: block; font-size: 0.9rem; margin-bottom: 4px;">⭕ Circle</strong>
+            <span style="font-size: 0.75rem; color: var(--text-secondary); display: block;">Select Area</span>
+          </div>
+
+          <div class="playground-gesture-card" data-gesture="underline" style="background: var(--bg-graphite); border: 1px solid var(--glass-border); border-radius: var(--radius-normal); padding: 20px 16px; text-align: center; cursor: pointer; transition: all 0.3s ease;">
+            <div class="gesture-anim-svg" style="height: 50px; display: flex; align-items: center; justify-content: center; margin-bottom: 10px;">
+              <svg width="40" height="40" viewBox="0 0 40 40">
+                <path d="M 8 24 Q 20 28 32 24" fill="none" stroke="var(--text-secondary)" stroke-width="3" stroke-dasharray="50" stroke-dashoffset="0" class="svg-underline-path"></path>
+              </svg>
+            </div>
+            <strong style="display: block; font-size: 0.9rem; margin-bottom: 4px;">〰 Underline</strong>
+            <span style="font-size: 0.75rem; color: var(--text-secondary); display: block;">Focus/Explain</span>
+          </div>
+
+          <div class="playground-gesture-card" data-gesture="arrow" style="background: var(--bg-graphite); border: 1px solid var(--glass-border); border-radius: var(--radius-normal); padding: 20px 16px; text-align: center; cursor: pointer; transition: all 0.3s ease;">
+            <div class="gesture-anim-svg" style="height: 50px; display: flex; align-items: center; justify-content: center; margin-bottom: 10px;">
+              <svg width="40" height="40" viewBox="0 0 40 40">
+                <path d="M 8 20 L 30 20 M 24 14 L 30 20 L 24 26" fill="none" stroke="var(--text-secondary)" stroke-width="3" stroke-dasharray="50" stroke-dashoffset="0" class="svg-arrow-path"></path>
+              </svg>
+            </div>
+            <strong style="display: block; font-size: 0.9rem; margin-bottom: 4px;">→ Arrow</strong>
+            <span style="font-size: 0.75rem; color: var(--text-secondary); display: block;">Route/Send</span>
+          </div>
+
+          <div class="playground-gesture-card" data-gesture="compare" style="background: var(--bg-graphite); border: 1px solid var(--glass-border); border-radius: var(--radius-normal); padding: 20px 16px; text-align: center; cursor: pointer; transition: all 0.3s ease;">
+            <div class="gesture-anim-svg" style="height: 50px; display: flex; align-items: center; justify-content: center; margin-bottom: 10px;">
+              <svg width="40" height="40" viewBox="0 0 40 40">
+                <path d="M 10 20 L 30 20 M 16 14 L 10 20 L 16 26 M 24 14 L 30 20 L 24 26" fill="none" stroke="var(--text-secondary)" stroke-width="3" stroke-dasharray="60" stroke-dashoffset="0" class="svg-compare-path"></path>
+              </svg>
+            </div>
+            <strong style="display: block; font-size: 0.9rem; margin-bottom: 4px;">↔ Connect</strong>
+            <span style="font-size: 0.75rem; color: var(--text-secondary); display: block;">Compare Specs</span>
+          </div>
+
+          <div class="playground-gesture-card" data-gesture="tick" style="background: var(--bg-graphite); border: 1px solid var(--glass-border); border-radius: var(--radius-normal); padding: 20px 16px; text-align: center; cursor: pointer; transition: all 0.3s ease;">
+            <div class="gesture-anim-svg" style="height: 50px; display: flex; align-items: center; justify-content: center; margin-bottom: 10px;">
+              <svg width="40" height="40" viewBox="0 0 40 40">
+                <path d="M 10 22 L 18 29 L 32 12" fill="none" stroke="var(--text-secondary)" stroke-width="3" stroke-dasharray="50" stroke-dashoffset="0" class="svg-tick-path"></path>
+              </svg>
+            </div>
+            <strong style="display: block; font-size: 0.9rem; margin-bottom: 4px;">✓ Check</strong>
+            <span style="font-size: 0.75rem; color: var(--text-secondary); display: block;">Save/Confirm</span>
+          </div>
+        </div>
+
+        <!-- Playground Sandbox Board -->
+        <div id="playground-sandbox-card" class="sim-screen-container" style="background: rgba(255,255,255,0.45); border: 1px solid var(--glass-border); border-radius: var(--radius-normal); padding: 28px; position: relative; box-shadow: var(--glass-shadow); backdrop-filter: var(--glass-blur); overflow: hidden; min-height: 240px;">
+          <!-- SVG Gesture Suggestion overlay -->
+          <div id="playground-guideline-overlay" style="position: absolute; inset: 0; pointer-events: none; z-index: 4; display: flex; align-items: center; justify-content: center; width: 100%; height: 100%;">
+            <!-- Will render dynamic guiding overlays -->
+          </div>
+          
+          <!-- Instructions top right -->
+          <div id="sandbox-instruction-label" style="position: absolute; top: 12px; right: 20px; font-size: 0.78rem; font-weight: 600; color: var(--color-cyan); display: flex; align-items: center; gap: 6px;">
+            <span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--color-cyan); animation: cursorPulse 1.5s infinite;"></span>
+            Draw gesture anywhere on element below
+          </div>
+
+          <div id="playground-sandbox-content" style="min-height: 180px; display: flex; align-items: center; justify-content: center; width: 100%;">
+            <!-- Loaded context targets will render here -->
+          </div>
+        </div>
+      </section>
+
+      <!-- One Gesture Different Intent Section -->
+      <section class="different-intent-section" style="max-width: 1000px; margin: 80px auto; padding: 0 40px;">
+        <div style="text-align: center; margin-bottom: 36px;">
+          <h2 style="font-size: 2.2rem; font-weight: 800; letter-spacing: -1px; margin-bottom: 12px;">ONE GESTURE.<br>DIFFERENT INTENT.</h2>
+          <p style="color: var(--text-secondary); max-width: 600px; margin: 0 auto; font-size: 0.95rem;">InkOS remains incredibly simple. The gesture stays circle, but the intelligence adapts automatically based on the content underneath.</p>
+        </div>
+
+        <!-- Showcase tabs -->
+        <div class="intent-showcase-container" style="background: rgba(255,255,255,0.45); border: 1px solid var(--glass-border); border-radius: var(--radius-normal); padding: 32px; box-shadow: var(--glass-shadow); backdrop-filter: var(--glass-blur); display: grid; grid-template-columns: 1fr 1.3fr; gap: 32px; align-items: center;">
+          <!-- Tab links -->
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+            <button class="intent-tab-btn active" data-intent="math" style="text-align: left; background: var(--bg-graphite); border: 1px solid var(--glass-border); border-radius: var(--radius-inner); padding: 14px 20px; cursor: pointer; transition: all 0.25s ease;">
+              <strong style="display: block; font-size: 0.95rem; margin-bottom: 2px; color: var(--color-cyan);">🧮 Math Equation</strong>
+              <span style="font-size: 0.78rem; color: var(--text-secondary);">Circle 125 × 8 ➔ Calculate</span>
+            </button>
+            <button class="intent-tab-btn" data-intent="translate" style="text-align: left; background: transparent; border: 1px solid transparent; border-radius: var(--radius-inner); padding: 14px 20px; cursor: pointer; transition: all 0.25s ease; width: 100%;">
+              <strong style="display: block; font-size: 0.95rem; margin-bottom: 2px;">🌍 Foreign Language</strong>
+              <span style="font-size: 0.78rem; color: var(--text-secondary);">Circle "Bonjour" ➔ Translate</span>
+            </button>
+            <button class="intent-tab-btn" data-intent="event" style="text-align: left; background: transparent; border: 1px solid transparent; border-radius: var(--radius-inner); padding: 14px 20px; cursor: pointer; transition: all 0.25s ease; width: 100%;">
+              <strong style="display: block; font-size: 0.95rem; margin-bottom: 2px;">📅 Meeting Schedule</strong>
+              <span style="font-size: 0.78rem; color: var(--text-secondary);">Circle "Friday 3 PM" ➔ Add Calendar</span>
+            </button>
+            <button class="intent-tab-btn" data-intent="code" style="text-align: left; background: transparent; border: 1px solid transparent; border-radius: var(--radius-inner); padding: 14px 20px; cursor: pointer; transition: all 0.25s ease; width: 100%;">
+              <strong style="display: block; font-size: 0.95rem; margin-bottom: 2px;">⚡ Developer Code</strong>
+              <span style="font-size: 0.78rem; color: var(--text-secondary);">Circle "console.log" ➔ Explain Code</span>
+            </button>
+            <button class="intent-tab-btn" data-intent="products" style="text-align: left; background: transparent; border: 1px solid transparent; border-radius: var(--radius-inner); padding: 14px 20px; cursor: pointer; transition: all 0.25s ease; width: 100%;">
+              <strong style="display: block; font-size: 0.95rem; margin-bottom: 2px;">⚖️ Product Specification</strong>
+              <span style="font-size: 0.78rem; color: var(--text-secondary);">Circle two watches ➔ Compare specs</span>
+            </button>
+          </div>
+
+          <!-- Simulation display area -->
+          <div style="background: white; border: 1px solid rgba(0,0,0,0.06); border-radius: var(--radius-inner); height: 260px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; padding: 24px; box-shadow: inset 0 2px 8px rgba(0,0,0,0.02);">
+            <div id="intent-sim-screen" style="width: 100%; text-align: center; display: flex; flex-direction: column; gap: 20px; align-items: center; justify-content: center;">
+              <!-- Injected elements -->
+            </div>
+            <!-- Canvas layer overlaying to simulate ink circle stroke -->
+            <canvas id="intent-sim-canvas" width="400" height="260" style="position: absolute; inset: 0; pointer-events: none; z-index: 3; width: 100%; height: 100%;"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <!-- Live Intent Engine Section -->
+      <section class="intent-engine-section" style="max-width: 1000px; margin: 80px auto; padding: 0 40px;">
+        <div style="text-align: center; margin-bottom: 40px;">
+          <h2 style="font-size: 2.2rem; font-weight: 800; letter-spacing: -1px; margin-bottom: 12px;">WHAT HAPPENS AFTER YOU DRAW?</h2>
+          <p style="color: var(--text-secondary); font-size: 0.95rem;">Watch the InkOS pipeline map your raw drawing points to real contextual outcomes.</p>
+        </div>
+
+        <div style="background: rgba(255,255,255,0.45); border: 1px solid var(--glass-border); border-radius: var(--radius-normal); padding: 32px; box-shadow: var(--glass-shadow); backdrop-filter: var(--glass-blur);">
+          <!-- Tabs selection of visualizer scenarios -->
+          <div style="display: flex; gap: 10px; justify-content: center; margin-bottom: 30px; border-bottom: 1px solid var(--glass-border); padding-bottom: 16px; flex-wrap: wrap;">
+            <button class="pipeline-tab-btn active" data-pipeline="meeting" style="background: var(--bg-graphite); border: 1px solid var(--glass-border); font-size: 0.82rem; padding: 8px 16px; border-radius: 20px; cursor: pointer; font-weight: 600;">Meeting Schedule</button>
+            <button class="pipeline-tab-btn" data-pipeline="math" style="background: transparent; border: 1px solid transparent; font-size: 0.82rem; padding: 8px 16px; border-radius: 20px; cursor: pointer; color: var(--text-secondary); font-weight: 600;">Equation</button>
+            <button class="pipeline-tab-btn" data-pipeline="french" style="background: transparent; border: 1px solid transparent; font-size: 0.82rem; padding: 8px 16px; border-radius: 20px; cursor: pointer; color: var(--text-secondary); font-weight: 600;">French Text</button>
+            <button class="pipeline-tab-btn" data-pipeline="code" style="background: transparent; border: 1px solid transparent; font-size: 0.82rem; padding: 8px 16px; border-radius: 20px; cursor: pointer; color: var(--text-secondary); font-weight: 600;">Code Block</button>
+            <button class="pipeline-tab-btn" data-pipeline="product" style="background: transparent; border: 1px solid transparent; font-size: 0.82rem; padding: 8px 16px; border-radius: 20px; cursor: pointer; color: var(--text-secondary); font-weight: 600;">Products comparison</button>
+          </div>
+
+          <!-- Flow steps graphics -->
+          <div class="pipeline-flow-wrapper" style="display: flex; justify-content: space-between; align-items: center; position: relative; gap: 10px; flex-wrap: wrap;">
+            
+            <!-- Step 1: User Stroke -->
+            <div class="pipeline-node" id="node-stroke" style="flex: 1; min-width: 140px; text-align: center; padding: 16px 12px; background: white; border: 1px solid rgba(0,0,0,0.06); border-radius: var(--radius-inner); position: relative; z-index: 2; transition: all 0.3s ease;">
+              <div style="font-size: 0.7rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 6px;">1. User Stroke</div>
+              <strong style="font-size: 0.82rem; color: var(--color-cyan);" id="pipe-val-stroke">Circle ⭕</strong>
+            </div>
+
+            <!-- Arrow connector -->
+            <div class="pipeline-arrow" style="width: 20px; height: 2px; background: rgba(0,0,0,0.08); position: relative;"></div>
+
+            <!-- Step 2: Content Selection -->
+            <div class="pipeline-node" id="node-selection" style="flex: 1; min-width: 140px; text-align: center; padding: 16px 12px; background: white; border: 1px solid rgba(0,0,0,0.06); border-radius: var(--radius-inner); position: relative; z-index: 2; transition: all 0.3s ease;">
+              <div style="font-size: 0.7rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 6px;">2. Content</div>
+              <strong style="font-size: 0.82rem;" id="pipe-val-content">"Interview - Fri 3 PM"</strong>
+            </div>
+
+            <!-- Arrow connector -->
+            <div class="pipeline-arrow" style="width: 20px; height: 2px; background: rgba(0,0,0,0.08); position: relative;"></div>
+
+            <!-- Step 3: Context Detection -->
+            <div class="pipeline-node" id="node-context" style="flex: 1; min-width: 140px; text-align: center; padding: 16px 12px; background: white; border: 1px solid rgba(0,0,0,0.06); border-radius: var(--radius-inner); position: relative; z-index: 2; transition: all 0.3s ease;">
+              <div style="font-size: 0.7rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 6px;">3. Context</div>
+              <strong style="font-size: 0.82rem; color: #C084FC;" id="pipe-val-context">📅 Future Event</strong>
+            </div>
+
+            <!-- Arrow connector -->
+            <div class="pipeline-arrow" style="width: 20px; height: 2px; background: rgba(0,0,0,0.08); position: relative;"></div>
+
+            <!-- Step 4: Intent Engine -->
+            <div class="pipeline-node" id="node-intent" style="flex: 1; min-width: 140px; text-align: center; padding: 16px 12px; background: white; border: 1px solid rgba(0,0,0,0.06); border-radius: var(--radius-inner); position: relative; z-index: 2; transition: all 0.3s ease;">
+              <div style="font-size: 0.7rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 6px; display: flex; align-items: center; justify-content: center; gap: 4px;">
+                <inkos-logo size="12px"></inkos-logo>
+                4. Intent
+              </div>
+              <strong style="font-size: 0.82rem; color: var(--color-cyan);" id="pipe-val-intent">Route Calendar</strong>
+            </div>
+
+            <!-- Arrow connector -->
+            <div class="pipeline-arrow" style="width: 20px; height: 2px; background: rgba(0,0,0,0.08); position: relative;"></div>
+
+            <!-- Step 5: Action Result -->
+            <div class="pipeline-node" id="node-action" style="flex: 1.1; min-width: 150px; text-align: center; padding: 16px 12px; background: white; border: 1px solid rgba(0,0,0,0.06); border-radius: var(--radius-inner); position: relative; z-index: 2; transition: all 0.3s ease;">
+              <div style="font-size: 0.7rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 6px;">5. Action Options</div>
+              <div style="display: flex; gap: 4px; justify-content: center; font-size: 0.75rem;" id="pipe-val-actions">
+                <span style="background: rgba(0, 122, 255, 0.08); color: var(--color-cyan); padding: 2px 6px; border-radius: 4px; font-weight: 600;">Calendar</span>
+                <span style="background: rgba(0,0,0,0.04); color: var(--text-secondary); padding: 2px 6px; border-radius: 4px;">Reminder</span>
+              </div>
+            </div>
+            
+          </div>
+        </div>
+      </section>
+
+      <!-- INKOS LAB Playground Sandbox Section -->
+      <section class="features-section" id="simulator-section" style="padding-top: 40px; padding-bottom: 80px; max-width: 1000px; margin: 0 auto;">
+        <div style="text-align: center; margin-bottom: 40px;">
+          <div class="hero-badge" style="margin-bottom: 8px;">InkOS Sandbox</div>
+          <h2 style="font-size: 2.2rem; font-weight: 800; letter-spacing: -1px; margin-bottom: 12px;">INKOS LAB</h2>
+          <p style="color: var(--text-secondary); font-size: 0.95rem; max-width: 600px; margin: 0 auto;">A place to try the interaction language yourself. Press <strong>Ctrl + Space</strong> or click the trigger button below to activate the overlay sheet and draw naturally.</p>
+        </div>
+
         <div id="hero-digital-screen" class="sim-screen-container" style="background: rgba(255, 255, 255, 0.45); border: 1px solid var(--glass-border); border-radius: var(--radius-normal); box-shadow: var(--glass-shadow); padding: 24px; position: relative; overflow: hidden; backdrop-filter: blur(15px);">
           
           <!-- Screen Header toolbar -->
@@ -61,8 +273,13 @@
               <span style="width: 10px; height: 10px; border-radius: 50%; background: #FFBD2E; display: inline-block;"></span>
               <span style="width: 10px; height: 10px; border-radius: 50%; background: #27C93F; display: inline-block;"></span>
             </div>
-            <div style="font-size: 0.75rem; font-weight: 600; color: var(--text-secondary); letter-spacing: 0.5px; text-transform: uppercase;">Simulated Operating Workspace</div>
-            <button id="hero-try-inkos" class="btn-primary" style="font-size: 0.75rem; padding: 6px 14px; border-radius: 20px; box-shadow: none; margin: 0; background: var(--color-cyan); color: white; border: none; font-weight: 600; cursor: pointer;">Try InkOS 🖎</button>
+            <div style="font-size: 0.75rem; font-weight: 600; color: var(--text-secondary); letter-spacing: 0.5px; text-transform: uppercase; display: flex; align-items: center; gap: 8px;">
+              <inkos-logo size="16px"></inkos-logo>
+              Interactive Sandbox Workspace
+            </div>
+            <button id="hero-try-inkos" class="btn-primary" style="font-size: 0.75rem; padding: 6px 14px; border-radius: 20px; box-shadow: none; margin: 0; background: var(--color-cyan); color: white; border: none; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+              Activate InkOS (Draw) 🖎
+            </button>
           </div>
 
           <!-- Digital Content Grid -->
@@ -70,9 +287,9 @@
             <!-- Column 1: Text, Translate and Equation -->
             <div style="display: flex; flex-direction: column; gap: 16px;">
               
-              <!-- Target 1: English Paragraph -->
-              <div class="inkos-target" data-inkos-type="text" data-inkos-content="InkOS is the future of digital interaction. By sitting above standard operating shells, it captures raw user drawings and executes localized AI calculations instantly." style="background: #FFFFFF; border: 1px solid var(--glass-border); border-radius: var(--radius-inner); padding: 16px; font-size: 0.9rem; line-height: 1.5; color: var(--text-primary);">
-                InkOS is the future of digital interaction. By sitting above standard operating shells, it captures raw user drawings and executes localized AI calculations instantly.
+              <!-- Target 1: English Event Text -->
+              <div class="inkos-target" id="txt-event-lab" data-inkos-type="text" data-inkos-content="Design Hand-off: Friday at 3:00 PM" style="background: #FFFFFF; border: 1px solid var(--glass-border); border-radius: var(--radius-inner); padding: 16px; font-size: 0.9rem; line-height: 1.5; color: var(--text-primary);">
+                📅 <strong>Schedule:</strong> Design Hand-off: Friday at 3:00 PM
               </div>
 
               <!-- Target 2: French Sentence -->
@@ -81,29 +298,50 @@
               </div>
 
               <!-- Target 3: Equation Box -->
-              <div class="inkos-target" id="eq-hero" data-inkos-type="math" data-inkos-content="125 * 48" style="background: #FFFFFF; border: 1px solid var(--glass-border); border-radius: var(--radius-inner); padding: 18px 24px; font-size: 1.5rem; font-family: var(--font-mono); font-weight: 600; text-align: center; color: var(--color-cyan);">
-                125 × 48
+              <div class="inkos-target" id="eq-hero" data-inkos-type="math" data-inkos-content="125 * 8" style="background: #FFFFFF; border: 1px solid var(--glass-border); border-radius: var(--radius-inner); padding: 18px 24px; font-size: 1.5rem; font-family: var(--font-mono); font-weight: 600; text-align: center; color: var(--color-cyan);">
+                125 × 8
               </div>
 
             </div>
 
-            <!-- Column 2: Visual product card & Tip -->
+            <!-- Column 2: Code and Products -->
             <div style="display: flex; flex-direction: column; gap: 16px;">
               
-              <!-- Target 4: Product Image card -->
-              <div class="sim-product-card inkos-target" id="img-hero" data-inkos-type="image" data-inkos-content="Heritage Chronograph Wristwatch" data-inkos-metadata='{"price": "$249.00", "ocrText": "HERITAGE AUTOMATIC"}' style="background: #FFFFFF; border: 1px solid var(--glass-border); border-radius: var(--radius-normal); padding: 16px; display: flex; flex-direction: column; gap: 8px;">
-                <div class="product-image-frame" style="width: 100%; height: 110px; background: rgba(0,0,0,0.03); border-radius: var(--radius-inner); overflow: hidden; display: flex; align-items: center; justify-content: center;">
-                  <img src="/heritage_watch.jpg" alt="Heritage Watch" style="max-height: 90%; max-width: 90%; object-fit: contain;" />
+              <!-- Target 4: Code Block -->
+              <pre id="code-lab" class="inkos-target code-card" data-inkos-type="code" data-inkos-content="function add(a, b) { return a + b; }" style="margin: 0; background: #FFFFFF; border: 1px solid var(--glass-border); border-radius: var(--radius-inner); padding: 12px; font-size: 0.78rem; font-family: var(--font-mono); color: var(--text-primary); max-height: 80px; overflow: hidden;"><code>function add(a, b) {
+  return a + b;
+}</code></pre>
+
+              <!-- Target 5: Two Product Cards side-by-side for comparison -->
+              <div style="display: flex; gap: 12px; width: 100%;">
+                
+                <!-- Product A -->
+                <div class="sim-product-card inkos-target" id="prod-a-hero" data-inkos-type="image" data-inkos-content="Heritage Automatic Watch" data-inkos-metadata='{"price": "$249.00", "type": "Automatic"}' style="background: #FFFFFF; border: 1px solid var(--glass-border); border-radius: var(--radius-normal); padding: 12px; display: flex; flex-direction: column; gap: 6px; flex: 1;">
+                  <div class="product-image-frame" style="width: 100%; height: 80px; background: rgba(0,0,0,0.03); border-radius: var(--radius-inner); overflow: hidden; display: flex; align-items: center; justify-content: center;">
+                    <img src="/heritage_watch.jpg" alt="Heritage Watch" style="max-height: 95%; max-width: 95%; object-fit: contain;" />
+                  </div>
+                  <div style="display: flex; flex-direction: column; font-size: 0.72rem; font-weight: 600; gap: 1px;">
+                    <span>Heritage Automatic</span>
+                    <span style="color: var(--color-cyan);">$249.00</span>
+                  </div>
                 </div>
-                <div style="display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 600; margin-top: 6px;">
-                  <span>Heritage Chrono</span>
-                  <span style="color: var(--color-cyan);">$249.00</span>
+
+                <!-- Product B -->
+                <div class="sim-product-card inkos-target" id="prod-b-hero" data-inkos-type="image" data-inkos-content="Vanguard Smartwatch" data-inkos-metadata='{"price": "$199.00", "type": "Smartwatch"}' style="background: #FFFFFF; border: 1px solid var(--glass-border); border-radius: var(--radius-normal); padding: 12px; display: flex; flex-direction: column; gap: 6px; flex: 1;">
+                  <div class="product-image-frame" style="width: 100%; height: 80px; background: rgba(0,0,0,0.03); border-radius: var(--radius-inner); overflow: hidden; display: flex; align-items: center; justify-content: center;">
+                    <img src="/heritage_watch.jpg" alt="Vanguard Smartwatch" style="max-height: 95%; max-width: 95%; object-fit: contain; filter: hue-rotate(140deg);" />
+                  </div>
+                  <div style="display: flex; flex-direction: column; font-size: 0.72rem; font-weight: 600; gap: 1px;">
+                    <span>Vanguard Smart</span>
+                    <span style="color: var(--color-cyan);">$199.00</span>
+                  </div>
                 </div>
+
               </div>
 
               <!-- Tip Instruction Banner inside Screen -->
-              <div style="background: rgba(0, 122, 255, 0.04); border: 1px solid rgba(0, 122, 255, 0.12); padding: 16px; border-radius: var(--radius-inner); font-size: 0.82rem; line-height: 1.5; color: var(--text-secondary);">
-                💡 <strong>Try Drawing:</strong> Click <strong>Try InkOS</strong> to unlock the overlay. Draw an underline under the French block, or draw a circle around the watch card or math calculation!
+              <div style="background: rgba(0, 122, 255, 0.04); border: 1px solid rgba(0, 122, 255, 0.12); padding: 12px; border-radius: var(--radius-inner); font-size: 0.8rem; line-height: 1.45; color: var(--text-secondary);">
+                💡 <strong>Try Gestures:</strong> Click <strong>Activate InkOS</strong>. Circle Heritage Watch, circle Vanguard Watch, then connect them with a horizontal line <strong>↔</strong> to compare specs side-by-side!
               </div>
 
             </div>
@@ -112,123 +350,76 @@
         </div>
       </section>
 
-      <!-- Step Flow Motion Graphics -->
-      <section style="max-width: 1000px; margin: 0 auto 60px; padding: 0 40px;">
-        <div class="step-flow-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; text-align: center;">
-          <div class="step-flow-card" style="background: var(--bg-graphite); border: 1px solid var(--glass-border); border-radius: var(--radius-normal); padding: 24px; box-shadow: var(--glass-shadow);">
-            <div style="font-size: 2rem; margin-bottom: 12px; color: var(--color-cyan);">⌨️</div>
-            <h4 style="margin-bottom: 6px; font-weight: 600;">1. Press Ctrl + Space</h4>
-            <p style="font-size: 0.82rem; color: var(--text-secondary);">Activates the nearly invisible, transparent interaction layer instantly.</p>
+      <!-- The Old Way vs InkOS Section -->
+      <section class="old-vs-new-section" style="max-width: 1000px; margin: 80px auto; padding: 0 40px;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; flex-wrap: wrap;">
+          <!-- Left Column: old way -->
+          <div style="background: rgba(0,0,0,0.02); border: 1px solid var(--glass-border); border-radius: var(--radius-normal); padding: 32px;">
+            <h3 style="color: var(--text-secondary); margin-bottom: 20px; font-weight: 600; font-size: 1.2rem;">THE OLD INTERACTION WAY</h3>
+            <ul style="list-style: none; display: flex; flex-direction: column; gap: 12px; font-size: 0.88rem; color: var(--text-muted);">
+              <li style="display: flex; gap: 10px; align-items: center;"><span style="color: var(--color-danger);">✕</span> See content of interest on screen</li>
+              <li style="display: flex; gap: 10px; align-items: center;"><span style="color: var(--color-danger);">✕</span> Take a screenshot or drag selection</li>
+              <li style="display: flex; gap: 10px; align-items: center;"><span style="color: var(--color-danger);">✕</span> Open a browser or calculator or notepad</li>
+              <li style="display: flex; gap: 10px; align-items: center;"><span style="color: var(--color-danger);">✕</span> Navigate to appropriate web prompt page</li>
+              <li style="display: flex; gap: 10px; align-items: center;"><span style="color: var(--color-danger);">✕</span> Paste content details and submit prompt</li>
+              <li style="display: flex; gap: 10px; align-items: center;"><span style="color: var(--color-danger);">✕</span> Copy outcome back to active program</li>
+            </ul>
+            <div style="margin-top: 24px; font-weight: 700; color: var(--color-danger); font-size: 0.85rem;">6 Steps | ~25 Seconds | Complete Context Disruption</div>
           </div>
-          <div class="step-flow-card" style="background: var(--bg-graphite); border: 1px solid var(--glass-border); border-radius: var(--radius-normal); padding: 24px; box-shadow: var(--glass-shadow);">
-            <div style="font-size: 2rem; margin-bottom: 12px; color: var(--color-cyan);">✍️</div>
-            <h4 style="margin-bottom: 6px; font-weight: 600;">2. Draw Gesture</h4>
-            <p style="font-size: 0.82rem; color: var(--text-secondary);">Circle an image, underline text, or draw a question mark over code.</p>
-          </div>
-          <div class="step-flow-card" style="background: var(--bg-graphite); border: 1px solid var(--glass-border); border-radius: var(--radius-normal); padding: 24px; box-shadow: var(--glass-shadow);">
-            <div style="font-size: 2rem; margin-bottom: 12px; color: var(--color-cyan);">✨</div>
-            <h4 style="margin-bottom: 6px; font-weight: 600;">3. Get Results</h4>
-            <p style="font-size: 0.82rem; color: var(--text-secondary);">Ink morphing creates a floating Glass Action Pill, resolving in place.</p>
+
+          <!-- Right Column: InkOS way -->
+          <div style="background: var(--bg-graphite); border: 2px solid var(--color-cyan); border-radius: var(--radius-normal); padding: 32px; box-shadow: var(--glass-shadow);">
+            <h3 style="color: var(--text-primary); margin-bottom: 20px; font-weight: 700; font-size: 1.25rem;">THE INKOS WAY</h3>
+            <ul style="list-style: none; display: flex; flex-direction: column; gap: 12px; font-size: 0.9rem; color: var(--text-primary);">
+              <li style="display: flex; gap: 10px; align-items: center;"><span style="color: var(--color-success); font-weight: 900;">✓</span> See information</li>
+              <li style="display: flex; gap: 10px; align-items: center;"><span style="color: var(--color-success); font-weight: 900;">✓</span> Draw simple gesture directly over it</li>
+              <li style="display: flex; gap: 10px; align-items: center;"><span style="color: var(--color-success); font-weight: 900;">✓</span> InkOS understands context semantically</li>
+              <li style="display: flex; gap: 10px; align-items: center;"><span style="color: var(--color-success); font-weight: 900;">✓</span> Action resolves in-place without swapping tabs</li>
+            </ul>
+            <div style="margin-top: 24px; font-weight: 700; color: var(--color-cyan); font-size: 0.9rem;">2 Steps | ~2 Seconds | Zero Context Interruption</div>
           </div>
         </div>
       </section>
 
-      <!-- Premium Showcase Interaction Sections -->
-      <section class="features-section" id="simulator-section" style="padding-top: 20px; padding-bottom: 100px;">
-        <div class="section-label-center" style="margin-bottom: 48px;">
-          <h2>Interactive Workflow Showcases</h2>
-          <p>Test the overlays live on this webpage. Press <strong>Ctrl + Space</strong> to draw on them, or click "Play Interaction Preview" to watch them run.</p>
+      <!-- Imagine This Storytelling Section -->
+      <section class="imagine-this-section" style="max-width: 1000px; margin: 80px auto; padding: 0 40px;">
+        <div style="text-align: center; margin-bottom: 40px;">
+          <h2 style="font-size: 2.2rem; font-weight: 800; letter-spacing: -1px; margin-bottom: 12px;">YOU SEE IT. INKOS KNOWS WHAT TO DO.</h2>
+          <p style="color: var(--text-secondary); font-size: 0.95rem;">Experience realistic scenarios of fluid screen interaction.</p>
         </div>
 
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(460px, 1fr)); gap: 32px; max-width: 1100px; margin: 0 auto;">
-          
-          <!-- Card 1: Text Translation -->
-          <div class="feature-glass-card" style="padding: 32px; display: flex; flex-direction: column; justify-content: space-between; min-height: 320px;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
+          <div class="feature-glass-card" style="padding: 24px; text-align: left; display: flex; flex-direction: column; justify-content: space-between; min-height: 180px;">
             <div>
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
-                <div class="feature-icon-box" style="margin: 0; background: rgba(0, 122, 255, 0.08); color: var(--color-cyan);">🌐</div>
-                <button class="composer-btn-sm play-showcase-btn" data-workflow="translation" style="max-width: 200px; padding: 6px 12px; margin: 0;">Play Interaction Preview 🎥</button>
-              </div>
-              <h3>Text Translation & Explain</h3>
-              <p style="margin-bottom: 20px; font-size: 0.9rem; color: var(--text-secondary);">Underline foreign text segments to invoke real-time translations.</p>
-              
-              <!-- Target Text Element -->
-              <div id="txt-fr" class="inkos-target" data-inkos-type="text" data-inkos-content="La vie est belle, pleine de défis mais aussi de moments extraordinaires." data-inkos-metadata='{"language": "fr"}' style="background: #FFFFFF; border: 1px solid var(--glass-border); border-radius: var(--radius-inner); padding: 18px; font-size: 0.95rem; line-height: 1.5; color: var(--text-primary);">
-                🇫🇷 La vie est belle, pleine de défis mais aussi de moments extraordinaires.
-              </div>
+              <span style="font-size: 1.5rem; display: block; margin-bottom: 8px;">📅</span>
+              <strong style="display: block; margin-bottom: 4px; font-size: 0.95rem;">Confirm Appointment</strong>
+              <p style="font-size: 0.8rem; color: var(--text-secondary);">Draw ⭕ + ✓ over "Flight to Mumbai Aug 25 8 AM" to instantly add it to your calendar.</p>
             </div>
           </div>
-
-          <!-- Card 2: Equation Calculator -->
-          <div class="feature-glass-card" style="padding: 32px; display: flex; flex-direction: column; justify-content: space-between; min-height: 320px;">
+          <div class="feature-glass-card" style="padding: 24px; text-align: left; display: flex; flex-direction: column; justify-content: space-between; min-height: 180px;">
             <div>
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
-                <div class="feature-icon-box" style="margin: 0; background: rgba(0, 122, 255, 0.08); color: var(--color-cyan);">🧮</div>
-                <button class="composer-btn-sm play-showcase-btn" data-workflow="math" style="max-width: 200px; padding: 6px 12px; margin: 0;">Play Interaction Preview 🎥</button>
-              </div>
-              <h3>Instant Equation Solving</h3>
-              <p style="margin-bottom: 20px; font-size: 0.9rem; color: var(--text-secondary);">Draw a circle or loop around mathematical formulas to solve equations.</p>
-              
-              <!-- Target Math Element -->
-              <div id="eq-1" class="inkos-target" data-inkos-type="math" data-inkos-content="125 * 8" style="background: #FFFFFF; border: 1px solid var(--glass-border); border-radius: var(--radius-inner); padding: 22px 24px; font-size: 1.6rem; font-family: var(--font-mono); font-weight: 600; text-align: center; color: var(--color-cyan);">
-                125 * 8
-              </div>
+              <span style="font-size: 1.5rem; display: block; margin-bottom: 8px;">🌍</span>
+              <strong style="display: block; margin-bottom: 4px; font-size: 0.95rem;">Translate Instantly</strong>
+              <p style="font-size: 0.8rem; color: var(--text-secondary);">Draw 〰 under a foreign text paragraph to pop a translation tooltip on the spot.</p>
             </div>
           </div>
-
-          <!-- Card 3: Visual Search -->
-          <div class="feature-glass-card" style="padding: 32px; display: flex; flex-direction: column; justify-content: space-between; min-height: 420px;">
+          <div class="feature-glass-card" style="padding: 24px; text-align: left; display: flex; flex-direction: column; justify-content: space-between; min-height: 180px;">
             <div>
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
-                <div class="feature-icon-box" style="margin: 0; background: rgba(0, 122, 255, 0.08); color: var(--color-cyan);">🛍️</div>
-                <button class="composer-btn-sm play-showcase-btn" data-workflow="visual" style="max-width: 200px; padding: 6px 12px; margin: 0;">Play Interaction Preview 🎥</button>
-              </div>
-              <h3>Visual Search & Save</h3>
-              <p style="margin-bottom: 20px; font-size: 0.9rem; color: var(--text-secondary);">Lasso circle image cards to visually search similar products and run OCR extraction.</p>
-              
-              <!-- Target Image Element -->
-              <div class="product-display-grid" style="grid-template-columns: 1fr;">
-                <div class="sim-product-card" style="background: transparent; border: none; padding: 0; align-items: stretch; gap: 8px;">
-                  <div id="img-watch" class="inkos-target product-image-frame" data-inkos-type="image" data-inkos-content="Heritage Chronograph Wristwatch" data-inkos-metadata='{"price": "$249.00", "ocrText": "HERITAGE AUTOMATIC"}' style="width: 100%; height: 200px; background: #F3F4F6;">
-                    <img src="/heritage_watch.jpg" alt="Luxury Watch" />
-                  </div>
-                  <div class="product-meta" style="margin-top: 8px; display: flex; justify-content: space-between; font-size: 0.95rem; font-weight: 600;">
-                    <span class="prod-name">Heritage Chrono</span>
-                    <span class="prod-price" style="color: var(--color-cyan);">$249.00</span>
-                  </div>
-                </div>
-              </div>
+              <span style="font-size: 1.5rem; display: block; margin-bottom: 8px;">⚖️</span>
+              <strong style="display: block; margin-bottom: 4px; font-size: 0.95rem;">Compare Products</strong>
+              <p style="font-size: 0.8rem; color: var(--text-secondary);">Draw ↔ connecting two product images to trigger a comparison spec table immediately.</p>
             </div>
           </div>
-
-          <!-- Card 4: Developer Sandbox -->
-          <div class="feature-glass-card" style="padding: 32px; display: flex; flex-direction: column; justify-content: space-between; min-height: 420px;">
+          <div class="feature-glass-card" style="padding: 24px; text-align: left; display: flex; flex-direction: column; justify-content: space-between; min-height: 180px;">
             <div>
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
-                <div class="feature-icon-box" style="margin: 0; background: rgba(0, 122, 255, 0.08); color: var(--color-cyan);">💻</div>
-                <button class="composer-btn-sm play-showcase-btn" data-workflow="code" style="max-width: 200px; padding: 6px 12px; margin: 0;">Play Interaction Preview 🎥</button>
-              </div>
-              <h3>Developer Code Explainer & Debugger</h3>
-              <p style="margin-bottom: 20px; font-size: 0.9rem; color: var(--text-secondary);">Draw a question mark over code lines to analyze execution flow, inspect bugs, or generate unit test specs.</p>
-              
-              <!-- Target Code Element -->
-              <pre id="code-block" class="inkos-target code-card" data-inkos-type="code" data-inkos-content="console.log('Running in InkOS sandbox!');
-const price = 249;
-const discount = 0.15;
-const finalPrice = price * (1 - discount);
-console.log('Final Calculated Price:', '$' + finalPrice.toFixed(2));" style="border-radius: var(--radius-inner); font-size: 0.78rem; max-height: 200px; overflow-y: auto; background: #F8FAFC; color: #1E293B; border: 1px solid rgba(0,0,0,0.06); padding: 18px; font-family: var(--font-mono); line-height: 1.5;"><code>console.log('Running in InkOS sandbox!');
-const price = 249;
-const discount = 0.15;
-const finalPrice = price * (1 - discount);
-console.log('Final Calculated Price:', '$' + finalPrice.toFixed(2));</code></pre>
+              <span style="font-size: 1.5rem; display: block; margin-bottom: 8px;">📤</span>
+              <strong style="display: block; margin-bottom: 4px; font-size: 0.95rem;">Connect & Share</strong>
+              <p style="font-size: 0.8rem; color: var(--text-secondary);">Draw ⭕ selection and arrow ➔ to Share target to send text blocks to friends.</p>
             </div>
           </div>
-
         </div>
       </section>
     </div>
-
-    <!-- TAB 2: CONFIGURATION DASHBOARD / SETTINGS -->
     <div id="tab-dashboard" class="tab-content">
       <section class="settings-dashboard-container">
         <h1>InkOS Settings Panel</h1>
@@ -517,9 +708,12 @@ console.log('Final Calculated Price:', '$' + finalPrice.toFixed(2));</code></pre
     <!-- TAB 4: DOWNLOADS -->
     <div id="tab-downloads" class="tab-content">
       <section class="downloads-section-container" style="text-align: center;">
+        <div style="display: flex; justify-content: center; margin-bottom: 16px;">
+          <inkos-logo size="80px"></inkos-logo>
+        </div>
         <h1>Get InkOS</h1>
         <p style="color: var(--text-secondary); margin-top: 8px;">Download native clients or install the standalone Developer SDK package.</p>
-
+ 
         <div class="downloads-grid">
           
           <div class="download-card">
@@ -527,27 +721,30 @@ console.log('Final Calculated Price:', '$' + finalPrice.toFixed(2));</code></pre
             <span class="platform-ver">v1.0.0-Beta | Windows 10/11</span>
             <button class="download-btn" onclick="alert('Downloading Windows installer (simulated)')">Download .msi Installer</button>
           </div>
-
+ 
           <div class="download-card">
             <span class="platform-name">🍎 macOS Client</span>
             <span class="platform-ver">v1.0.0-Beta | Apple Silicon M1/M2/M3</span>
             <button class="download-btn" onclick="alert('Downloading macOS DMG package (simulated)')">Download .dmg Installer</button>
           </div>
-
+ 
           <div class="download-card">
             <span class="platform-name">📦 Developer SDK</span>
             <span class="platform-ver">npm package | TypeScript / Node.js</span>
             <button class="download-btn" onclick="alert('Developer setup guides copied to clipboard (simulated)')">npm i @inkos/core-sdk</button>
           </div>
-
+ 
         </div>
       </section>
     </div>
-
+ 
     <!-- Master Footer -->
-    <footer class="master-footer">
-      <div class="footer-logo">InkOS</div>
-      <div class="footer-copy">© 2026 InkOS Technologies Inc. All rights reserved. Every Screen. One Language.</div>
+    <footer class="master-footer" style="padding: 40px 20px; display: flex; flex-direction: column; align-items: center; gap: 16px; border-top: 1px solid var(--glass-border);">
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <inkos-logo size="36px"></inkos-logo>
+        <span style="font-weight: 800; font-size: 1.5rem; letter-spacing: -1px; color: var(--text-primary);">InkOS</span>
+      </div>
+      <div class="footer-copy" style="color: var(--text-secondary); font-size: 0.82rem; text-align: center; margin-top: 0;">© 2026 InkOS Technologies Inc. Ideas. Inked. Impact. All rights reserved.</div>
     </footer>
 
     <!-- Bottom Right Floating Orb and Control Center -->

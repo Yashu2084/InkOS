@@ -31,9 +31,30 @@ export interface Gesture {
   confidence: number;
   bounds: BoundingBox;
   points: Point[];
+  sourcePoint?: Point;
+  targetPoint?: Point;
+  direction?: string;
+  alternatives?: { gesture: string; confidence: number }[];
 }
 
-export type ContextType = 'text' | 'image' | 'math' | 'table' | 'code' | 'empty';
+export type ContextType = 
+  | 'text' 
+  | 'image' 
+  | 'math' 
+  | 'table' 
+  | 'code' 
+  | 'empty'
+  | 'equation'
+  | 'date'
+  | 'time'
+  | 'event'
+  | 'deadline'
+  | 'product'
+  | 'email'
+  | 'phone'
+  | 'address'
+  | 'link'
+  | 'multiple';
 
 export interface ContextElement {
   id: string;

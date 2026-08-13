@@ -1,11 +1,50 @@
-import type { Point, Gesture, GestureType, BoundingBox, CustomGestureTemplate } from './types';
+import type { Point, Gesture, BoundingBox, CustomGestureTemplate } from './types';
 
 export class GestureEngine {
+  /**
+   * Preprocesses raw noisy point coordinates.
+   */
+  public static preprocessPoints(points: Point[]): Point[] {
+    if (points.length < 3) return points;
+    
+    // 1. Remove duplicates / extremely close consecutive points
+    const filtered: Point[] = [points[0]];
+    for (let i = 1; i < points.length; i++) {
+      const p1 = filtered[filtered.length - 1];
+      const p2 = points[i];
+      const dx = p2.x - p1.x;
+      const dy = p2.y - p1.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist > 1.5) {
+        filtered.push(p2);
+      }
+    }
+    
+    if (filtered.length < 3) return filtered;
+    
+    // 2. Smooth points using moving average window of 3
+    const smoothed: Point[] = [filtered[0]];
+    for (let i = 1; i < filtered.length - 1; i++) {
+      const prev = filtered[i - 1];
+      const curr = filtered[i];
+      const next = filtered[i + 1];
+      smoothed.push({
+        x: (prev.x + curr.x + next.x) / 3,
+        y: (prev.y + curr.y + next.y) / 3,
+        t: curr.t,
+        pressure: curr.pressure
+      });
+    }
+    smoothed.push(filtered[filtered.length - 1]);
+    
+    return smoothed;
+  }
+
   /**
    * Recognizes a gesture from a sequence of points.
    */
   public static recognize(points: Point[]): Gesture {
-    if (points.length < 5) {
+    if (points.length < 3) {
       return {
         type: 'unknown',
         confidence: 0,
@@ -14,105 +53,84 @@ export class GestureEngine {
       };
     }
 
+    // Preserve original bounding box
+    const bounds = this.getBoundingBox(points);
+    
+    // Preprocess raw points
+    const smoothedPoints = this.preprocessPoints(points);
+
     // 0. Check custom template registry first
-    const customMatch = this.recognizeCustom(points);
+    const customMatch = this.recognizeCustom(smoothedPoints);
     if (customMatch) {
       return customMatch;
     }
 
-    const bounds = this.getBoundingBox(points);
-    const centroid = this.getCentroid(points);
-    const pathLength = this.getPathLength(points);
-    const startEndDist = this.getDistance(points[0], points[points.length - 1]);
+    const centroid = this.getCentroid(smoothedPoints);
+
+    const startEndDist = this.getDistance(smoothedPoints[0], smoothedPoints[smoothedPoints.length - 1]);
     const diagonal = Math.sqrt(bounds.width * bounds.width + bounds.height * bounds.height);
 
     // Heuristics calculations
-    const isClosed = startEndDist < diagonal * 0.25 || startEndDist < 40;
+    const isClosed = startEndDist < diagonal * 0.35 || startEndDist < 50;
     
     // Calculate distance details from centroid to assess circularity
-    const distances = points.map(p => this.getDistance(p, centroid));
+    const distances = smoothedPoints.map(p => this.getDistance(p, centroid));
     const meanDistance = distances.reduce((sum, d) => sum + d, 0) / distances.length;
     const variance = distances.reduce((sum, d) => sum + Math.pow(d - meanDistance, 2), 0) / distances.length;
     const stdDev = Math.sqrt(variance);
-    const circularity = meanDistance > 0 ? stdDev / meanDistance : 1; // Lower stdDev/mean ratio means more circular
+    const circularity = meanDistance > 0 ? stdDev / meanDistance : 1; 
 
-    // Check for underline: mostly horizontal, start/end far apart, low height
-    const isHorizontal = bounds.width > bounds.height * 2.5 && bounds.height < 100;
-    const isUnderline = isHorizontal && !isClosed && (startEndDist > bounds.width * 0.7);
+    // Heuristic scoring for ranking
+    const circleScore = isClosed ? Math.max(0.4, 1.0 - (circularity * 1.5)) : 0.0;
+    const lassoScore = isClosed ? Math.max(0.3, 1.0 - (startEndDist / (diagonal + 1))) : 0.0;
+    const underlineScore = (bounds.width > bounds.height * 2.2 && !isClosed && startEndDist > bounds.width * 0.7) ? 0.92 : 0.1;
+    const arrowScore = this.detectArrow(smoothedPoints) ? 0.85 : 0.15;
+    const tickScore = this.detectTick(smoothedPoints) ? 0.90 : 0.1;
+    const leftrightScore = (bounds.width > bounds.height * 2.2 && !isClosed && smoothedPoints.length > 25) ? 0.88 : 0.1;
 
-    // Check for cross (scribble/scratch/strike-through)
-    // Detect multiple direction reversals (zig-zag)
-    let directionChanges = 0;
-    let lastDx = 0;
-    for (let i = 2; i < points.length; i++) {
-      const dx = points[i].x - points[i - 1].x;
-      if (i > 2) {
-        if (Math.sign(dx) !== Math.sign(lastDx) && Math.abs(dx) > 2 && Math.abs(lastDx) > 2) {
-          directionChanges++;
-        }
-      }
-      lastDx = dx;
+    // Rank candidates
+    const candidates = [
+      { gesture: 'circle', confidence: circleScore },
+      { gesture: 'lasso', confidence: lassoScore },
+      { gesture: 'underline', confidence: underlineScore },
+      { gesture: 'arrow', confidence: arrowScore },
+      { gesture: 'tick', confidence: tickScore },
+      { gesture: 'leftrightarrow', confidence: leftrightScore }
+    ];
+
+    candidates.sort((a, b) => b.confidence - a.confidence);
+
+    let type = candidates[0].gesture;
+    let confidence = candidates[0].confidence;
+    
+    if (confidence < 0.25) {
+      type = 'unknown';
+      confidence = 0.2;
     }
-    const isCross = (directionChanges >= 3 && pathLength > diagonal * 1.5) || (points.length > 20 && directionChanges > 4);
 
-    // Check for Question Mark: starts curved (top-left to top-right to center) then goes down
-    // Let's analyze quadrants or vertical movement
-    const isQuestionMark = this.detectQuestionMark(points, bounds);
+    const alternatives = candidates.slice(1)
+      .filter(c => c.confidence > 0.18)
+      .map(c => ({ gesture: c.gesture, confidence: parseFloat(c.confidence.toFixed(2)) }));
 
-    // Determine gesture type
-    let type: GestureType = 'unknown';
-    let confidence = 0.5;
-
-    if (isCross) {
-      type = 'cross';
-      confidence = Math.min(0.6 + (directionChanges * 0.05), 0.95);
-    } else if (isQuestionMark) {
-      type = 'question';
-      confidence = 0.8;
-    } else if (isClosed) {
-      // Circularity < 0.18 is very circular
-      if (circularity < 0.20) {
-        type = 'circle';
-        confidence = Math.min(0.95, 1 - circularity);
-      } else {
-        // If closed but not circular, it is a rectangle or lasso
-        // Let's distinguish by aspect ratio or bounding box coverage
-        const rectCoverage = this.getRectangleCoverage(points, bounds);
-        if (rectCoverage > 0.75) {
-          type = 'rectangle';
-          confidence = Math.min(0.9, rectCoverage);
-        } else {
-          type = 'lasso';
-          confidence = 0.8;
-        }
-      }
-    } else if (isUnderline) {
-      type = 'underline';
-      confidence = Math.min(0.95, bounds.width / (bounds.height + 1) / 5);
+    // Extract arrow details
+    const sourcePoint = smoothedPoints[0];
+    const targetPoint = smoothedPoints[smoothedPoints.length - 1];
+    let direction = 'right';
+    if (Math.abs(targetPoint.x - sourcePoint.x) > Math.abs(targetPoint.y - sourcePoint.y)) {
+      direction = targetPoint.x > sourcePoint.x ? 'right' : 'left';
     } else {
-      // Check for simple checkmark/tick: down then sharp up-right
-      const isTick = this.detectTick(points);
-      if (isTick) {
-        type = 'tick';
-        confidence = 0.85;
-      } else {
-        // Check for arrow
-        const isArrow = this.detectArrow(points);
-        if (isArrow) {
-          type = 'arrow';
-          confidence = 0.8;
-        } else {
-          type = 'unknown';
-          confidence = 0.3;
-        }
-      }
+      direction = targetPoint.y > sourcePoint.y ? 'down' : 'up';
     }
 
     return {
       type,
       confidence: parseFloat(confidence.toFixed(2)),
       bounds,
-      points
+      points,
+      sourcePoint,
+      targetPoint,
+      direction,
+      alternatives
     };
   }
 
@@ -161,52 +179,7 @@ export class GestureEngine {
     return Math.sqrt(dx * dx + dy * dy);
   }
 
-  /**
-   * Estimates how much the points fill the bounding box perimeter
-   */
-  private static getRectangleCoverage(points: Point[], bounds: BoundingBox): number {
-    // Simple heuristic: count how many points are close to the edges of the bounding box
-    const threshold = Math.max(bounds.width, bounds.height) * 0.15;
-    let edgePoints = 0;
-    
-    for (const p of points) {
-      const nearLeft = Math.abs(p.x - bounds.x) < threshold;
-      const nearRight = Math.abs(p.x - (bounds.x + bounds.width)) < threshold;
-      const nearTop = Math.abs(p.y - bounds.y) < threshold;
-      const nearBottom = Math.abs(p.y - (bounds.y + bounds.height)) < threshold;
-      
-      if (nearLeft || nearRight || nearTop || nearBottom) {
-        edgePoints++;
-      }
-    }
-    
-    return edgePoints / points.length;
-  }
 
-  private static detectQuestionMark(points: Point[], bounds: BoundingBox): boolean {
-    if (points.length < 8) return false;
-    // Question mark: goes right, then curves down and left, then down vertically.
-    // Check if start is in the middle-left, goes up and right, curves down, and ends below start in X.
-    const start = points[0];
-    const end = points[points.length - 1];
-    
-    // Top-most point should be in the middle of the stroke index
-    let topIdx = 0;
-    let minY = Infinity;
-    for (let i = 0; i < points.length; i++) {
-      if (points[i].y < minY) {
-        minY = points[i].y;
-        topIdx = i;
-      }
-    }
-    
-    // Question mark curves: Top point should be after start, but before end.
-    // Also, the overall stroke should have vertical dominance but significant width.
-    const hasRightCurve = points.slice(0, topIdx + 5).some(p => p.x > start.x + bounds.width * 0.2);
-    const endsBelow = end.y > start.y && Math.abs(end.x - (bounds.x + bounds.width/2)) < bounds.width * 0.3;
-    
-    return hasRightCurve && endsBelow && bounds.height > bounds.width * 1.1;
-  }
 
   private static detectTick(points: Point[]): boolean {
     // A checkmark/tick: starts high, goes down-right, then sharp bend, and goes up-right (longer).
